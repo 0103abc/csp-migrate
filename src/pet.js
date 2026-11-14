@@ -343,7 +343,7 @@ function update(value) {
     (settings.timeAware !== value.timeAware ||
       settings.autoActions !== value.autoActions)
   )
-    clockState = clockEvents.createState();
+    clockState = clockEvents.resumeState(clockState);
   settings = value;
   applyLocale(value.locale);
   if (bubble.dataset.original) bubble.textContent = T(bubble.dataset.original);
@@ -439,7 +439,7 @@ document.addEventListener("visibilitychange", () => {
     frame(back ? "back" : "idle");
     active = "idle";
   } else {
-    clockState = clockEvents.createState();
+    clockState = clockEvents.resumeState(clockState);
     lastActivity = Date.now();
   }
 });

@@ -50,6 +50,10 @@ test("meal reminders deduplicate, honor quiet cooldown and reset on a new local 
   assert.equal(clock.takeDue(date(11, 30), s, o).group, "lunch");
   assert.equal(clock.takeDue(date(11, 40), s, o), null);
   assert.equal(clock.takeDue(date(12), s, o), null);
+  const resumed = clock.resumeState(s, date(12, 10));
+  assert.equal(clock.takeDue(date(12, 20), resumed, o), null);
+  const tomorrow = clock.resumeState(resumed, date(11, 20, 15));
+  assert.equal(clock.takeDue(date(11, 30, 15), tomorrow, o).group, "lunch");
   assert.equal(clock.takeDue(date(14), s, o).group, "afternoon");
   assert.equal(clock.takeDue(date(14, 1), s, o), null);
   assert.equal(clock.takeDue(date(14, 20), s, { timeAware: false }), null);

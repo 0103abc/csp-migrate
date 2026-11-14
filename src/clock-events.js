@@ -79,5 +79,11 @@
       }).format(date),
     };
   }
-  return { dayKey, period, createState, takeDue };
+  function resumeState(state, date = new Date()) {
+    const next = createState(date);
+    if (state.day === next.day)
+      next.seen = new Set([...state.seen, ...next.seen]);
+    return next;
+  }
+  return { dayKey, period, createState, resumeState, takeDue };
 });
