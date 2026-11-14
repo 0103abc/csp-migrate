@@ -13,6 +13,7 @@
     "test:ui": "playwright test",
     "check:secrets": "node scripts/check-secrets.cjs",
     "assets": "node scripts/prepare-assets.cjs",
+    "assets:scenes": "node scripts/prepare-scenes.cjs",
     "build": "node scripts/build.cjs"
   },
   "devDependencies": {

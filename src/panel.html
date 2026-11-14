@@ -9,6 +9,7 @@
     />
     <title>Migrate · 对话与设置</title>
     <link rel="stylesheet" href="panel.css" />
+    <link rel="stylesheet" href="scenes.css" />
   </head>
   <body>
     <header class="hero">
@@ -99,6 +100,26 @@
             API。同组台词轮换抽取，避免重复。
           </p>
         </div>
+        <div class="scene-menu" aria-label="海风小剧场">
+          <button data-scene="meal">
+            一起吃饭<span>端饭 · 拿勺 · 慢慢吃</span>
+          </button>
+          <button data-scene="home">
+            去她家做客<span>海边同行 · 灯塔小屋</span>
+          </button>
+          <button data-scene="cake">
+            请你吃蛋糕<span>草莓奶油 · 第一块给你</span>
+          </button>
+          <button data-scene="pudding">
+            请你吃布丁<span>焦糖布丁 · 晃一晃</span>
+          </button>
+        </div>
+        <div
+          id="scene-player"
+          class="scene-player hidden"
+          data-no-localize
+        ></div>
+        <h3 class="scene-caption-title">随时来一个小动作</h3>
         <div class="action-grid">
           <button data-action="wave">挥手</button
           ><button data-action="turn">转身</button
@@ -316,6 +337,7 @@
     <script src="../node_modules/opencc-js/dist/umd/full.js"></script>
     <script src="i18n.js"></script>
     <script src="dialogue.js"></script>
+    <script src="scenes.js"></script>
     <script src="panel.js"></script>
   </body>
 </html>

@@ -2,9 +2,15 @@
 
 const DEFAULT_PERSONA =
   "你是米格瑞特（Migrate），15岁的航海少女，与海洋和海鸟为伴，是航海法杖的主人，也是用户的桌面伙伴。你活泼、好奇、机灵，待人温柔，有自己的主见；说话轻快自然，偶尔俏皮地开个小玩笑，用适量语气词表达情绪。你喜欢发现小事里的乐趣，也会主动接住用户的话题。遇到做题或实际问题时，要清楚、认真、可靠。偶尔用海风、潮汐、航行做自然的比喻，通常回应两到四句，用户需要时可以详细解释。不要在每句话中堆砌航海意象或叹号，不要自称语言模型，不要声称能访问你没有的电脑功能，不要编造已经执行了电脑操作。";
-const LEGACY_DEFAULT_PERSONA = "你是米格瑞特（Migrate），一位与海洋和海鸟为伴的成年旅人、航海法杖的主人，也是用户的桌面伙伴。你温柔、机灵、有自己的主见，偶尔用海风、潮汐、航行做自然的比喻。通常回应两到四句，用户需要时可以详细解释。不要在每句话中堆砌航海意象，不要自称语言模型，不要声称能访问你没有的电脑功能，不要编造已经执行了电脑操作。";
+const LEGACY_DEFAULT_PERSONA =
+  "你是米格瑞特（Migrate），一位与海洋和海鸟为伴的成年旅人、航海法杖的主人，也是用户的桌面伙伴。你温柔、机灵、有自己的主见，偶尔用海风、潮汐、航行做自然的比喻。通常回应两到四句，用户需要时可以详细解释。不要在每句话中堆砌航海意象，不要自称语言模型，不要声称能访问你没有的电脑功能，不要编造已经执行了电脑操作。";
 function upgradeDefaultPersona(persona) {
-  return [LEGACY_DEFAULT_PERSONA, LEGACY_DEFAULT_PERSONA.replace("通常回应", "用简体中文回应，通常")].includes(persona) ? DEFAULT_PERSONA : persona;
+  return [
+    LEGACY_DEFAULT_PERSONA,
+    LEGACY_DEFAULT_PERSONA.replace("通常回应", "用简体中文回应，通常"),
+  ].includes(persona)
+    ? DEFAULT_PERSONA
+    : persona;
 }
 const DEFAULTS = Object.freeze({
   shortcut: "Ctrl+Alt+M",

@@ -10,7 +10,8 @@ let settings,
   clearKey = false,
   videoStarted = false,
   musicUrl = null,
-  settingsDirty = false;
+  settingsDirty = false,
+  scenePlayer;
 for (const selector of [
   "#connection-label",
   "#key-status",
@@ -32,6 +33,7 @@ function toast(text, error = false, duration = 5500) {
   noticeTimer = setTimeout(() => $("#toast").classList.add("hidden"), duration);
 }
 function switchTab(tab) {
+  if (tab !== "play") scenePlayer?.pause();
   if (!["chat", "play", "music", "settings"].includes(tab)) tab = "chat";
   document
     .querySelectorAll(".tab-content")
@@ -67,6 +69,7 @@ function update(value, fillForm = false) {
   $("#connection-dot").classList.toggle("connected", value.hasKey);
   $("#key-status").textContent = T(value.hasKey ? "已加密保存" : "未设置");
   $("#model-label").textContent = value.model;
+  scenePlayer?.refreshLocale();
   const currentGroup = $("#dialogue-group").value;
   $("#dialogue-group").replaceChildren(
     ...Object.entries(window.MigrateDialogue.groups).map(([id, group]) => {
@@ -333,4 +336,12 @@ document.querySelectorAll("[data-action]").forEach((button) => {
   button.onclick = () => api.action(button.dataset.action);
 });
 $("#speak-line").onclick = () => api.speak($("#dialogue-group").value);
+scenePlayer = new window.MigrateSceneTheater.ScenePlayer($("#scene-player"), T);
+document.querySelectorAll("[data-scene]").forEach((button) => {
+  button.onclick = () => {
+    clearTimeout(noticeTimer);
+    $("#toast").classList.add("hidden");
+    scenePlayer.play(button.dataset.scene);
+  };
+});
 $("#open-problem").onclick = () => api.openProblem();

@@ -26,6 +26,7 @@ const path = require("node:path");
       ProductName: "Migrate",
     },
     ignore: [
+      /^\/dist(?:\/|$)/,
       /^\/\.githooks(?:\/|$)/,
       /^\/\.git(?:\/|$)/,
       /^\/\.github(?:\/|$)/,
@@ -36,6 +37,7 @@ const path = require("node:path");
       /^\/docs(?:\/|$)/,
       /^\/playwright\.config\.cjs$/,
       /^\/assets\/migrate-atlas\.png$/,
+      /^\/assets\/(?:scenes-atlas|home-backgrounds-atlas)\.png$/,
     ],
   });
   console.log(`Built Windows app: ${paths.join(", ")}`);

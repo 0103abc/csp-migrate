@@ -63,10 +63,24 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
       },
     });
     const pet = await app.firstWindow();
+    // Keep this isolated test invisible and unable to intercept the user's desktop.
+    await app.evaluate(({ app, BrowserWindow }) => {
+      const passive = (win) => {
+        win.setOpacity(0);
+        win.setFocusable(false);
+        win.setIgnoreMouseEvents(true, { forward: true });
+      };
+      BrowserWindow.getAllWindows().forEach(passive);
+      app.on("browser-window-created", (_, win) => passive(win));
+    });
     watch(pet);
     await pet.waitForLoadState();
     await expect(pet.locator("#sprite")).toBeVisible();
-    expect(await pet.locator("#pet").evaluate(element => getComputedStyle(element).animationName)).toBe("quietbreath");
+    expect(
+      await pet
+        .locator("#pet")
+        .evaluate((element) => getComputedStyle(element).animationName),
+    ).toBe("quietbreath");
     expect(await pet.evaluate(() => typeof require)).toBe("undefined");
     const initial = await app.evaluate(
       ({ BrowserWindow, screen, globalShortcut }) => ({
@@ -145,6 +159,88 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
     await panel.locator("#save-settings").click();
     await expect(panel.locator('[data-tab="settings"]')).toContainText("设置");
     await panel.locator('[data-tab="play"]').click();
+    await expect(panel.locator("[data-scene]")).toHaveCount(4);
+    await panel.locator('[data-scene="meal"]').click();
+    await expect(panel.locator(".scene-caption")).toContainText("饭做好啦");
+    await panel.locator('[data-control="pause"]').click();
+    expect(await panel.evaluate(() => scenePlayer.getState().paused)).toBe(
+      true,
+    );
+    await panel.evaluate(() => {
+      scenePlayer.state.elapsed = 10000;
+      scenePlayer.resume();
+    });
+    await expect(panel.locator(".scene-character.visible")).toHaveAttribute(
+      "src",
+      /eat-lift/,
+    );
+    await panel.evaluate(() => {
+      scenePlayer.state.elapsed = 11500;
+    });
+    await expect(panel.locator(".scene-character.visible")).toHaveAttribute(
+      "src",
+      /eat-bite/,
+    );
+    await panel.locator('[data-control="pause"]').click();
+    await expect(panel.locator(".scene-character.visible")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await panel
+      .locator("#scene-player")
+      .screenshot({ path: path.join(scratch, "meal-scene.png") });
+    await panel.locator('[data-control="replay"]').click();
+    await expect(panel.locator(".scene-caption")).toContainText("饭做好啦");
+    await panel.locator('[data-control="end"]').click();
+    await expect(panel.locator("#scene-player")).toBeHidden();
+    await panel.locator('[data-scene="home"]').click();
+    await panel.evaluate(() => {
+      scenePlayer.state.elapsed = 14000;
+    });
+    await expect(panel.locator(".scene-bg.visible")).toHaveAttribute(
+      "src",
+      /scene-home.jpg/,
+    );
+    await expect(panel.locator(".scene-caption")).toContainText("请进");
+    await panel.locator('[data-control="pause"]').click();
+    await expect(panel.locator(".scene-character.visible")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await panel
+      .locator("#scene-player")
+      .screenshot({ path: path.join(scratch, "home-scene.png") });
+    await panel.locator('[data-control="end"]').click();
+    await panel.locator('[data-scene="cake"]').click();
+    await panel.evaluate(() => {
+      scenePlayer.state.elapsed = 4000;
+    });
+    await expect(panel.locator(".scene-character.visible")).toHaveAttribute(
+      "src",
+      /offer-cake/,
+    );
+    await expect(panel.locator(".scene-stage")).toHaveAttribute(
+      "data-food",
+      "cake",
+    );
+    await panel.locator('[data-control="end"]').click();
+    await panel.locator('[data-scene="pudding"]').click();
+    await panel.evaluate(() => {
+      scenePlayer.state.elapsed = 4000;
+    });
+    await expect(panel.locator(".scene-character.visible")).toHaveAttribute(
+      "src",
+      /offer-pudding/,
+    );
+    await expect(panel.locator(".scene-stage")).toHaveAttribute(
+      "data-food",
+      "pudding",
+    );
+    await panel.evaluate(() => {
+      scenePlayer.state.elapsed = 24600;
+    });
+    await expect(panel.locator('[data-control="pause"]')).toBeDisabled();
+    await panel.locator('[data-control="end"]').click();
     await expect(panel.locator("[data-action]")).toHaveCount(17);
     await expect(panel.locator("#dialogue-group option")).toHaveCount(30);
     await panel.locator('[data-action="birds"]').click();
@@ -162,12 +258,17 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
     await expect
       .poll(() => app.evaluate(() => globalThis.openedUrls.at(-1)))
       .toBe("https://qoj.ac/problem/24562/statement/zh_cn");
-    await panel.locator("#play-tab").evaluate(element => { element.scrollTop = 0; });
+    await panel.locator("#play-tab").evaluate((element) => {
+      element.scrollTop = 0;
+    });
     await panel.screenshot({ path: path.join(scratch, "play.png") });
     await panel.locator('[data-action="magic"]').click();
     await expect(pet.locator("#sprite")).toHaveAttribute("src", /sleep\.png/);
     await expect(pet.locator("#sprite")).toHaveAttribute("src", /magic\.png/);
-    await pet.screenshot({ path: path.join(scratch, "pet.png"), omitBackground: true });
+    await pet.screenshot({
+      path: path.join(scratch, "pet.png"),
+      omitBackground: true,
+    });
     await panel.locator('[data-tab="chat"]').click();
     await panel.locator("#message-input").fill("你好");
     await panel.locator("#send").click();
