@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Migrate · 米格瑞特</title>
+    <link rel="stylesheet" href="pet.css" />
+  </head>
+  <body>
+    <main id="stage">
+      <div id="bubble" class="bubble" role="status">海风把我带到你身边啦。</div>
+      <div class="compass-glow" aria-hidden="true"></div>
+      <button
+        id="pet"
+        class="pet idle"
+        data-interactive
+        aria-label="米格瑞特，拖动移动，双击对话，右键打开菜单"
+        title="拖动移动 · 双击对话 · 右键更多"
+      >
+        <img
+          id="sprite"
+          src="../assets/idle.png"
+          draggable="false"
+          alt="米格瑞特"
+        /><img
+          id="turn-sprite"
+          src="../assets/side.png"
+          draggable="false"
+          alt=""
+          aria-hidden="true"
+        />
+        <span id="sparkles" aria-hidden="true">✧</span>
+        <span id="birds" aria-hidden="true"
+          ><svg viewBox="0 0 36 16"><path d="M1 12Q9 0 18 12Q27 0 35 12" /></svg
+          ><svg viewBox="0 0 36 16"><path d="M1 12Q9 0 18 12Q27 0 35 12" /></svg
+          ><svg viewBox="0 0 36 16"><path d="M1 12Q9 0 18 12Q27 0 35 12" /></svg
+        ></span>
+      </button>
+      <nav class="dock" data-interactive aria-label="桌宠操作">
+        <span class="name">Migrate<span class="online-dot"></span></span>
+        <button id="chat" aria-label="打开对话" title="和她聊聊">☏</button>
+        <button id="turn" aria-label="转身" title="转身">↻</button>
+        <button id="magic" aria-label="潮汐魔法" title="潮汐魔法">✧</button>
+        <button id="music" aria-label="播放白鸟过河滩" title="听《白鸟过河滩》">
+          ♫
+        </button>
+        <button
+          id="problem"
+          aria-label="打开 QOJ 迁徙题面"
+          title="QOJ · CSP-S 2026 迁徙"
+        >
+          题
+        </button>
+        <button id="settings" aria-label="打开设置" title="设置 / DeepSeek API">
+          ⚙
+        </button>
+        <button id="hide" aria-label="隐藏桌宠" title="隐藏（Ctrl+Alt+M 呼出）">
+          −
+        </button>
+      </nav>
+    </main>
+    <script src="../node_modules/opencc-js/dist/umd/full.js"></script>
+    <script src="i18n.js"></script>
+    <script src="dialogue.js"></script>
+    <script src="pet.js"></script>
+  </body>
+</html>

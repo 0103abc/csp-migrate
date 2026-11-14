@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; frame-src https://player.bilibili.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Migrate · 对话与设置</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="titlebar">
+        <span>M I G R A T E <i> / </i> 海风来信</span
+        ><button id="close" class="icon-button" aria-label="关闭面板">×</button>
+      </div>
+      <div class="profile">
+        <div class="portrait">
+          <img src="../assets/portrait.png" alt="米格瑞特" />
+        </div>
+        <div>
+          <div class="eyebrow">YOUR LITTLE HARBOR</div>
+          <h1>米格瑞特 <span>Migrate</span></h1>
+          <p>海风在这里，陪你慢慢说。</p>
+        </div>
+        <span class="compass" aria-hidden="true">✧</span>
+      </div>
+    </header>
+    <nav class="tabs" aria-label="面板导航">
+      <button class="selected" data-tab="chat" aria-selected="true">
+        对话 <span>CHAT</span></button
+      ><button data-tab="play" aria-selected="false">
+        互动 <span>PLAY</span></button
+      ><button data-tab="music" aria-selected="false">
+        听歌 <span>MUSIC</span></button
+      ><button data-tab="settings" aria-selected="false">
+        设置 <span>SETTINGS</span>
+      </button>
+    </nav>
+    <main>
+      <section id="chat-tab" class="tab-content chat-tab">
+        <div class="chat-top">
+          <span
+            ><i id="connection-dot" class="dot"></i
+            ><span id="connection-label">未配置 DeepSeek</span></span
+          ><button id="clear-chat" class="text-button">清空对话</button>
+        </div>
+        <div
+          id="messages"
+          class="messages"
+          role="log"
+          aria-label="对话消息"
+          aria-live="polite"
+        >
+          <div class="welcome" id="welcome">
+            <div class="welcome-icon">⌁</div>
+            <p class="welcome-title">在这里，靠一会儿岸。</p>
+            <p>
+              我是米格瑞特。无论是今天的小事，<br />还是想不明白的心事，都可以告诉我。
+            </p>
+            <div class="suggestions">
+              <button>今天有点累了</button><button>讲一个海边的故事</button>
+            </div>
+          </div>
+        </div>
+        <form id="chat-form" class="composer">
+          <div class="input-wrap">
+            <textarea
+              id="message-input"
+              rows="2"
+              maxlength="8000"
+              placeholder="给米格瑞特写点什么……"
+              aria-label="消息"
+            ></textarea
+            ><button type="submit" id="send" aria-label="发送消息">↑</button
+            ><button
+              type="button"
+              id="stop"
+              class="hidden"
+              aria-label="停止回复"
+            >
+              ■
+            </button>
+          </div>
+          <div class="composer-note">
+            <span>Enter 发送 · Shift+Enter 换行</span
+            ><span id="model-label">DeepSeek</span>
+          </div>
+        </form>
+      </section>
+      <section id="play-tab" class="tab-content hidden scrollable">
+        <div class="section-heading">
+          <span>01 / 桌边的小小剧场</span>
+          <h2>想和她玩一会儿？</h2>
+          <p>
+            17 种动作 · 30 组原创台词 · 共 300 句<br />离线互动，不调用
+            API。同组台词轮换抽取，避免重复。
+          </p>
+        </div>
+        <div class="action-grid">
+          <button data-action="wave">挥手</button
+          ><button data-action="turn">转身</button
+          ><button data-action="happy">开心</button
+          ><button data-action="nod">点头</button
+          ><button data-action="shake">摇头</button
+          ><button data-action="bounce">轻跃</button
+          ><button data-action="stretch">伸展</button
+          ><button data-action="shy">害羞</button
+          ><button data-action="sway">摇摆</button
+          ><button data-action="float">漂浮</button
+          ><button data-action="birds">唤海鸟</button
+          ><button data-action="magic">潮汐魔法</button
+          ><button data-action="looksea">回身看海</button
+          ><button data-action="peek">探头看看</button
+          ><button data-action="sleep">打个盹</button
+          ><button data-action="walk-left">向左散步</button
+          ><button data-action="walk-right">向右散步</button>
+        </div>
+        <label
+          >挑一组台词<select
+            id="dialogue-group"
+            data-no-localize
+          ></select></label
+        ><button id="speak-line" class="secondary wide">让她说一句 ↗</button>
+        <div class="section-rule"></div>
+        <div class="section-heading">
+          <span>02 / 一起去看她的来处</span>
+          <h2>迁徙 / Migrate</h2>
+          <p>
+            CSP-S 2026 · QOJ #24562<br />在浏览器打开官方题面，不提交代码或账号信息。
+          </p>
+        </div>
+        <button id="open-problem" class="primary wide">打开 QOJ 题面 ↗</button>
+      </section>
+      <section id="music-tab" class="tab-content hidden scrollable">
+        <div class="section-heading">
+          <span>01 / 一首海风里的歌</span>
+          <h2>白鸟过河滩</h2>
+          <p>把声音留在身边，让思绪随风走远。</p>
+        </div>
+        <div class="music-card">
+          <div class="record"><span>✧</span></div>
+          <div>
+            <h3>白鸟过河滩</h3>
+            <p>ilem · 洛天依原作</p>
+            <span class="tag">原作在线 / 本地音频</span>
+          </div>
+        </div>
+        <div class="row-buttons">
+          <button id="play-original" class="primary">▶ 播放原作视频</button
+          ><button id="open-original" class="secondary">浏览器打开 ↗</button>
+        </div>
+        <div id="video-wrap" class="video-wrap hidden">
+          <iframe
+            id="music-video"
+            title="白鸟过河滩 · 原作播放器"
+            allow="autoplay; fullscreen"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
+            referrerpolicy="no-referrer"
+            allowfullscreen
+          ></iframe
+          ><button id="stop-original" class="text-button">停止在线播放</button>
+        </div>
+        <div class="section-rule"></div>
+        <h3 class="small-heading">本地播放</h3>
+        <p class="hint">
+          选择你保存的歌曲音频，即可在桌宠里播放。文件只在本机使用。
+        </p>
+        <button id="choose-music" class="secondary wide">
+          ＋ 选择《白鸟过河滩》音频
+        </button>
+        <p id="music-file" class="file-label">尚未选择音频文件</p>
+        <audio
+          id="local-audio"
+          controls
+          loop
+          preload="metadata"
+          class="wide"
+          aria-label="本地歌曲播放器"
+        ></audio>
+        <p class="footnote">
+          在线播放可能受平台、地区或登录状态影响；无法播放时可在浏览器打开原作，或选择本地文件。音乐不会随程序启动自动播放。
+        </p>
+      </section>
+      <section id="settings-tab" class="tab-content hidden scrollable">
+        <form id="settings-form">
+          <div class="section-heading">
+            <span>01 / 连接她的声音</span>
+            <h2>DeepSeek</h2>
+            <p>填入你自己的密钥，开启与米格瑞特的对话。</p>
+          </div>
+          <label
+            >API Key <span id="key-status" class="field-tag">未设置</span
+            ><input
+              id="api-key"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="sk-…"
+              maxlength="1024"
+          /></label>
+          <p class="hint">
+            密钥由 Windows 账户加密保存，不会显示或同步到
+            GitHub。留空会保留现有密钥。
+          </p>
+          <button type="button" id="delete-key" class="text-button danger">
+            移除已保存的密钥
+          </button>
+          <label
+            >API 地址<input
+              id="base-url"
+              type="url"
+              spellcheck="false"
+              required
+              value="https://api.deepseek.com"
+          /></label>
+          <label
+            >模型名称<input
+              id="model"
+              type="text"
+              list="models"
+              required
+              value="deepseek-flash"
+              spellcheck="false" /><datalist id="models">
+              <option value="deepseek-flash"></option>
+              <option value="deepseek-v4-pro"></option>
+              <option value="deepseek-chat"></option>
+              <option value="deepseek-reasoner"></option></datalist
+          ></label>
+          <p class="hint">
+            兼容 Chat Completions
+            API。请求会发送至上面填写的地址；可按自己的账户修改模型。
+          </p>
+          <div class="section-rule"></div>
+          <div class="section-heading">
+            <span>02 / 她在桌面上的样子</span>
+            <h2>桌面偏好</h2>
+          </div>
+          <label
+            >界面与对话语言<select id="locale" data-no-localize>
+              <option value="zh-CN">简体中文</option>
+              <option value="zh-HK">繁體中文（香港）</option>
+            </select></label
+          >
+          <label
+            >显示 / 隐藏快捷键<input
+              id="shortcut"
+              required
+              value="Ctrl+Alt+M"
+              placeholder="Ctrl+Alt+M"
+              spellcheck="false"
+          /></label>
+          <p class="hint">隐藏后可用快捷键或系统托盘再次呼出。</p>
+          <label class="range-label"
+            >桌宠大小 <output id="size-value">100%</output
+            ><input
+              type="range"
+              id="size"
+              min="0.7"
+              max="1.5"
+              step="0.05"
+              value="1"
+          /></label>
+          <label class="toggle-row"
+            ><span>保持在其他窗口上方<small>随时都能看见她</small></span
+            ><input id="always-on-top" type="checkbox" checked class="toggle"
+          /></label>
+          <label class="toggle-row"
+            ><span>闲暇时做小动作<small>挥手、休息与潮汐魔法</small></span
+            ><input id="auto-actions" type="checkbox" checked class="toggle"
+          /></label>
+          <label
+            >自动动作间隔<select id="idle-interval">
+              <option value="45">约 45 秒</option>
+              <option value="90" selected>约 90 秒（默认）</option>
+              <option value="180">约 3 分钟</option>
+              <option value="300">约 5 分钟</option>
+            </select></label
+          >
+          <p class="hint">
+            平时保持安静站姿，动作结束后自然收势。关闭自动动作后只在你操作时回应。
+          </p>
+          <label class="toggle-row"
+            ><span>开机启动<small>登录 Windows 时自动来报到</small></span
+            ><input id="launch-at-login" type="checkbox" class="toggle"
+          /></label>
+          <button type="button" id="go-home" class="secondary wide">
+            回到桌面右下角 ↘
+          </button>
+          <div class="section-rule"></div>
+          <label
+            >角色设定<textarea
+              id="persona"
+              rows="5"
+              maxlength="8000"
+              required
+            ></textarea>
+          </label>
+          <p class="hint">
+            对话仅保留在当前会话内。关闭程序或清空对话后即移除，不写入磁盘。
+          </p>
+          <div class="settings-actions">
+            <button class="primary" type="submit" id="save-settings">
+              保存设置</button
+            ><button class="secondary" type="button" id="test-api">
+              保存并测试连接
+            </button>
+          </div>
+          <p class="version">MIGRATE / v1.0.0 · 愿每一次停靠，都有海风。</p>
+        </form>
+      </section>
+    </main>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <script src="../node_modules/opencc-js/dist/umd/full.js"></script>
+    <script src="i18n.js"></script>
+    <script src="dialogue.js"></script>
+    <script src="panel.js"></script>
+  </body>
+</html>
