@@ -488,6 +488,11 @@
   };
   const bags = new Map(),
     last = new Map();
+  const timeExtras =
+    typeof module === "object" && module.exports
+      ? require("./time-dialogue.js")
+      : globalThis.MigrateTimeDialogue;
+  Object.assign(groups, timeExtras || {});
   function sample(id, random = Math.random) {
     const group = groups[id] || groups.idle;
     let bag = bags.get(id);
@@ -507,17 +512,28 @@
   }
   function timeGroup(date = new Date()) {
     const hour = date.getHours();
-    return hour < 6 || hour >= 23
-      ? "night"
-      : hour < 11
-        ? "morning"
-        : hour < 14
-          ? "noon"
-          : hour < 18
-            ? "idle"
-            : "evening";
+    return hour < 5
+      ? "midnight"
+      : hour < 7
+        ? "dawn"
+        : hour < 11
+          ? "morning"
+          : hour < 14
+            ? "noon"
+            : hour < 17
+              ? "afternoon"
+              : hour < 19
+                ? "sunset"
+                : hour < 22
+                  ? "evening"
+                  : "bedtime";
   }
-  function ambientGroup(date = new Date(), random = Math.random) {
+  function ambientGroup(
+    date = new Date(),
+    random = Math.random,
+    timeAware = true,
+  ) {
+    if (timeAware && random() < 0.65) return timeGroup(date);
     const ids = [
       "wave",
       "focus",
@@ -536,10 +552,9 @@
       "float",
       "stretch",
       "shy",
-      timeGroup(date),
     ];
-    if ([0, 6].includes(date.getDay())) ids.push("weekend");
-    if (date.getHours() >= 20) ids.push("stars", "night", "sleep");
+    if (timeAware && [0, 6].includes(date.getDay())) ids.push("weekend");
+    if (timeAware && date.getHours() >= 20) ids.push("stars", "night", "sleep");
     return ids[Math.floor(random() * ids.length)];
   }
   return {

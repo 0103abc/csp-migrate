@@ -51,6 +51,17 @@ button {
   pointer-events: none;
   filter: drop-shadow(0 5px 4px #152b5138);
 }
+#turn-canvas {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 320px;
+  height: 327px;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 5px 4px #152b5138);
+}
 .compass-glow {
   position: absolute;
   width: 144px;
@@ -177,9 +188,6 @@ button {
 }
 .pet.talk {
   animation: talk 1.4s ease-in-out infinite;
-}
-.pet.turning {
-  animation: turn 0.7s ease-in-out;
 }
 .pet.thinking #sparkles {
   animation: spark 1.7s ease-in-out infinite;
@@ -478,6 +486,9 @@ button {
 }
 .pet.looksea {
   animation: quietbreath 7s ease-in-out infinite;
+}
+.pet.looksea.turning {
+  animation: none;
 }
 .pet.peek {
   animation: peek-sequence 5s ease-in-out 1;

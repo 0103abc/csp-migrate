@@ -11,7 +11,7 @@ const files = execFileSync("git", ["ls-files", "-z"], {
   .split("\0")
   .filter(Boolean);
 const forbidden =
-  /(^|\/)(?:\.env(?:\..+)?|settings\.json(?:\.tmp)?|userdata|node_modules|dist)(?:\/|$)|\.(?:pem|key)$/i;
+  /(^|\/)(?:\.env(?:\..+)?|settings\.json(?:\.tmp)?|contest-cache\.json(?:\.tmp)?|userdata|node_modules|dist)(?:\/|$)|\.(?:pem|key)$/i;
 const patterns = [
   /sk-[a-zA-Z0-9_-]{20,}/,
   /gh[pousr]_[a-zA-Z0-9]{20,}/,

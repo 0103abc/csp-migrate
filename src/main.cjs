@@ -12,6 +12,8 @@ const {
   dialog,
   session,
   shell,
+  net,
+  powerMonitor,
 } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -25,6 +27,11 @@ const {
 } = require("./core.cjs");
 const { text: localize } = require("./i18n.js");
 const dialogue = require("./dialogue.js");
+const { ContestService } = require("./contests.cjs");
+let contestService,
+  reminder,
+  reminderItems = [],
+  reminderTimer;
 
 app.setName("csp-migrate");
 if (process.env.MIGRATE_USER_DATA)
@@ -67,6 +74,7 @@ const allowedActions = new Set([
 ]);
 const petFile = path.join(__dirname, "pet.html"),
   panelFile = path.join(__dirname, "panel.html");
+const reminderFile = path.join(__dirname, "reminder.html");
 const settingsPath = () => path.join(app.getPath("userData"), "settings.json");
 const send = (win, channel, payload) => {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
@@ -132,6 +140,10 @@ function publicSettings() {
 function broadcastSettings() {
   send(pet, "settings:updated", publicSettings());
   send(panel, "settings:updated", publicSettings());
+  send(reminder, "contests:reminder", {
+    items: reminderItems,
+    locale: settings.locale,
+  });
   updateTray();
   if (panel && !panel.isDestroyed())
     panel.setTitle(localize("Migrate · 对话与设置", settings.locale));
@@ -387,6 +399,10 @@ function menuTemplate() {
     { label: "设置 / DeepSeek API", click: () => openPanel("settings") },
     { label: "听《白鸟过河滩》", click: () => openPanel("music") },
     { label: "互动动作与台词", click: () => openPanel("play") },
+    {
+      label: "比赛提醒 / Codeforces · AtCoder",
+      click: () => openPanel("contests"),
+    },
     { label: "打开 QOJ · CSP-S 2026《迁徙》", click: openProblem },
     { type: "separator" },
     {
@@ -447,11 +463,14 @@ function createTray() {
   );
   tray.setToolTip("米格瑞特 · Migrate");
   tray.on("double-click", togglePet);
+  tray.on("balloon-click", () => openPanel("contests"));
   updateTray();
 }
 function trusted(event, kind) {
-  const expected = kind === "pet" ? pet : panel;
-  const expectedFile = kind === "pet" ? petFile : panelFile;
+  const expected =
+    kind === "reminder" ? reminder : kind === "pet" ? pet : panel;
+  const expectedFile =
+    kind === "reminder" ? reminderFile : kind === "pet" ? petFile : panelFile;
   return Boolean(
     expected &&
     event.sender === expected.webContents &&
@@ -517,9 +536,97 @@ async function saveSettings(raw) {
   if (app.isPackaged && previous.launchAtLogin !== settings.launchAtLogin)
     app.setLoginItemSettings({ openAtLogin: settings.launchAtLogin });
   broadcastSettings();
+  if (
+    ["contestReminders", "codeforcesReminders", "atcoderReminders"].some(
+      (key) => previous[key] !== settings[key],
+    )
+  ) {
+    if (!settings.contestReminders) reminder?.close();
+    void contestService?.refresh();
+  }
   return publicSettings();
 }
+function showContestReminder(items) {
+  if (quitting) return;
+  reminderItems = items;
+  const names = items.map((item) => item.name).join(" / ");
+  send(pet, "pet:animate", {
+    contestText: `比赛快开始啦！${names}，还有不到 5 分钟，带上你的好点子出发吧～`,
+  });
+  if (process.env.MIGRATE_PASSIVE_TEST !== "1") {
+    try {
+      tray?.displayBalloon({
+        title: localize("Migrate · 比赛即将开始", settings.locale),
+        content: localize(
+          `${names}\n5 分钟赛前提醒，点击查看赛程。`,
+          settings.locale,
+        ).slice(0, 240),
+        respectQuietTime: true,
+      });
+    } catch {
+      /* The independent in-app reminder still appears. */
+    }
+  }
+  if (!reminder || reminder.isDestroyed()) {
+    const area = screen.getDisplayMatching(pet.getBounds()).workArea;
+    const width = Math.min(364, area.width),
+      height = Math.min(236, area.height);
+    reminder = guardedWindow(
+      {
+        ...clampBounds(
+          {
+            x: area.x + area.width - width - 12,
+            y: area.y + area.height - height - 12,
+            width,
+            height,
+          },
+          area,
+        ),
+        alwaysOnTop: true,
+        skipTaskbar: true,
+        backgroundColor: "#f6f8fc",
+      },
+      reminderFile,
+    );
+    reminder.once("ready-to-show", () => reminder?.showInactive());
+    reminder.on("closed", () => {
+      reminder = null;
+    });
+  } else {
+    send(reminder, "contests:reminder", { items, locale: settings.locale });
+    reminder.showInactive();
+  }
+  clearTimeout(reminderTimer);
+  reminderTimer = setTimeout(() => reminder?.close(), 45000);
+}
 function setupIpc() {
+  ipcMain.handle("contests:get", (event) =>
+    trusted(event, "panel") ? contestService?.snapshot() : null,
+  );
+  ipcMain.handle("contests:refresh", (event) =>
+    trusted(event, "panel") ? contestService?.refresh() : null,
+  );
+  ipcMain.handle("contests:reminder-get", (event) =>
+    trusted(event, "reminder")
+      ? { items: reminderItems, locale: settings.locale }
+      : null,
+  );
+  ipcMain.on("contests:reminder-close", (event) => {
+    if (trusted(event, "reminder")) reminder.close();
+  });
+  ipcMain.on("contests:reminder-open", (event) => {
+    if (trusted(event, "reminder")) {
+      reminder.close();
+      openPanel("contests");
+    }
+  });
+  ipcMain.on("contests:open", (event, key) => {
+    if (!trusted(event, "panel")) return;
+    const item = contestService
+      ?.snapshot()
+      .items.find((item) => item.key === key);
+    if (item) shell.openExternal(item.url).catch(() => {});
+  });
   ipcMain.handle("settings:get", (event) =>
     anyTrusted(event) ? publicSettings() : null,
   );
@@ -657,7 +764,9 @@ function setupIpc() {
   });
   ipcMain.on("panel:open", (event, tab) => {
     if (anyTrusted(event))
-      openPanel(["settings", "music", "play"].includes(tab) ? tab : "chat");
+      openPanel(
+        ["settings", "music", "play", "contests"].includes(tab) ? tab : "chat",
+      );
   });
   ipcMain.on("panel:close", (event) => {
     if (trusted(event, "panel")) panel.hide();
@@ -701,6 +810,19 @@ else {
       setupIpc();
       createPet();
       createTray();
+      contestService = new ContestService({
+        cacheFile: path.join(app.getPath("userData"), "contest-cache.json"),
+        getSettings: () => settings,
+        fetcher: (url, options) => net.fetch(url, options),
+        onChange: (value) => send(panel, "contests:updated", value),
+        onReminder: showContestReminder,
+      });
+      contestService.tick();
+      contestService.start();
+      powerMonitor.on("resume", () => {
+        contestService.tick();
+        void contestService.refresh();
+      });
       try {
         if (!globalShortcut.register(settings.shortcut, togglePet))
           shortcutError = "快捷键被其他程序占用，请在设置中更换。";
@@ -733,6 +855,8 @@ app.on("before-quit", () => {
   stopDrag();
   stopWalk();
   currentRequest?.abort();
+  contestService?.stop();
+  clearTimeout(reminderTimer);
   clearTimeout(saveTimer);
   if (settings) {
     try {

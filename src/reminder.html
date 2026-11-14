@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Migrate · 比赛提醒</title>
+    <link rel="stylesheet" href="reminder.css" />
+  </head>
+  <body>
+    <header>
+      <span>✧ MIGRATE / 比赛提醒</span
+      ><button id="close" aria-label="关闭">×</button>
+    </header>
+    <main>
+      <img src="../assets/portrait.png" alt="米格瑞特" />
+      <div>
+        <h1>比赛快开始啦！</h1>
+        <p id="message">还有不到 5 分钟，带上好点子出发吧～</p>
+      </div>
+    </main>
+    <div id="names" aria-live="polite"></div>
+    <footer>
+      <small>海风替你加油 w</small><button id="view">查看比赛 ↗</button>
+    </footer>
+    <script src="../node_modules/opencc-js/dist/umd/full.js"></script>
+    <script src="i18n.js"></script>
+    <script src="reminder.js"></script>
+  </body>
+</html>

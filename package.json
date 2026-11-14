@@ -1,7 +1,7 @@
 {
   "name": "csp-migrate",
   "productName": "Migrate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "米格瑞特 Migrate · 海风与你同在的 Windows 桌面伙伴",
   "main": "src/main.cjs",
   "author": "csp-migrate contributors",
@@ -9,11 +9,12 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node --test test/core.test.cjs",
+    "test": "node --test test/*.test.cjs",
     "test:ui": "playwright test",
     "check:secrets": "node scripts/check-secrets.cjs",
     "assets": "node scripts/prepare-assets.cjs",
     "assets:scenes": "node scripts/prepare-scenes.cjs",
+    "assets:turn": "node scripts/prepare-turn.cjs",
     "build": "node scripts/build.cjs"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "sharp": "0.35.5"
   },
   "dependencies": {
+    "cheerio": "1.2.0",
     "opencc-js": "1.4.2"
   }
 }

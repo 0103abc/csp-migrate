@@ -12,6 +12,15 @@ let settings,
   musicUrl = null,
   settingsDirty = false,
   scenePlayer;
+let contestSnapshot = null;
+const preferenceInputs = {
+  timeAware: "time-aware",
+  restReminders: "rest-reminders",
+  hourlyChime: "hourly-chime",
+  contestReminders: "contest-reminders",
+  codeforcesReminders: "codeforces-reminders",
+  atcoderReminders: "atcoder-reminders",
+};
 for (const selector of [
   "#connection-label",
   "#key-status",
@@ -35,7 +44,8 @@ function toast(text, error = false, duration = 5500) {
 }
 function switchTab(tab) {
   if (tab !== "play") scenePlayer?.pause();
-  if (!["chat", "play", "music", "settings"].includes(tab)) tab = "chat";
+  if (!["chat", "play", "music", "settings", "contests"].includes(tab))
+    tab = "chat";
   document
     .querySelectorAll(".tab-content")
     .forEach((element) =>
@@ -47,6 +57,7 @@ function switchTab(tab) {
     button.setAttribute("aria-selected", String(selected));
   });
   if (tab === "chat") $("#message-input").focus();
+  if (tab === "contests") api.getContests().then(renderContests);
 }
 document
   .querySelectorAll("[data-tab]")
@@ -73,6 +84,10 @@ function update(value, fillForm = false) {
   $(".version").textContent =
     `MIGRATE / v${value.version} · ${T("愿每一次停靠，都有海风。")}`;
   scenePlayer?.refreshLocale();
+  $("#dialogue-count").textContent = T(
+    `17 种动作 · ${Object.keys(window.MigrateDialogue.groups).length} 组原创台词 · 共 ${window.MigrateDialogue.count} 句`,
+  );
+  renderContests(contestSnapshot);
   const currentGroup = $("#dialogue-group").value;
   $("#dialogue-group").replaceChildren(
     ...Object.entries(window.MigrateDialogue.groups).map(([id, group]) => {
@@ -101,6 +116,8 @@ function update(value, fillForm = false) {
     $("#idle-interval").value = value.idleInterval;
     $("#launch-at-login").checked = value.launchAtLogin;
     $("#persona").value = value.persona;
+    for (const [key, id] of Object.entries(preferenceInputs))
+      $(`#${id}`).checked = value[key];
   }
   if (value.keyProblem || value.shortcutError)
     toast(value.keyProblem || value.shortcutError, true, 12000);
@@ -140,6 +157,8 @@ async function save() {
     launchAtLogin: $("#launch-at-login").checked,
     persona: $("#persona").value,
   };
+  for (const [key, id] of Object.entries(preferenceInputs))
+    value[key] = $(`#${id}`).checked;
   const result = await api.saveSettings(value);
   if (!result.ok) {
     toast(result.error, true);
@@ -348,3 +367,71 @@ document.querySelectorAll("[data-scene]").forEach((button) => {
   };
 });
 $("#open-problem").onclick = () => api.openProblem();
+$("#speak-now").onclick = () => api.speak(window.MigrateDialogue.timeGroup());
+function renderContests(value) {
+  if (!value) return;
+  contestSnapshot = value;
+  const locale = settings?.locale === "zh-HK" ? "zh-HK" : "zh-CN";
+  const dateTime = (stamp) =>
+    new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZoneName: "short",
+    }).format(stamp);
+  const label = (provider) =>
+    provider === "codeforces" ? "Codeforces" : "AtCoder";
+  $("#refresh-contests").disabled = value.refreshing;
+  $("#refresh-contests").textContent = T(
+    value.refreshing ? "正在刷新…" : "刷新赛程",
+  );
+  $("#contest-status").textContent = value.providers
+    .map(
+      (p) =>
+        `${label(p.provider)} · ${T(!p.enabled ? "提醒已关闭" : p.error || (p.fetchedAt ? "更新于" : "等待获取赛程"))}${p.fetchedAt ? " " + dateTime(p.fetchedAt) : ""}`,
+    )
+    .join("\n");
+  const list = $("#contest-list");
+  list.replaceChildren();
+  if (!value.items.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = T(
+      "暂时没有可显示的赛程。请开启对应提醒后刷新，或稍后重试。",
+    );
+    list.append(empty);
+  }
+  for (const item of value.items) {
+    const card = document.createElement("article");
+    card.className = "contest-card";
+    const provider = value.providers.find((p) => p.provider === item.provider);
+    const tag = document.createElement("div");
+    tag.className = "contest-tag";
+    tag.textContent = `${label(item.provider)} · ${T(provider?.enabled ? "提前 5 分钟提醒" : "提醒已关闭")}`;
+    const title = document.createElement("h3");
+    title.textContent = item.name;
+    const time = document.createElement("p");
+    time.textContent = `${dateTime(item.startsAt)} · ${T("时长")} ${Math.floor(item.durationSeconds / 3600)}h ${Math.floor(item.durationSeconds / 60) % 60}m`;
+    const button = document.createElement("button");
+    button.className = "secondary";
+    button.textContent = T("打开比赛 ↗");
+    button.onclick = () => api.openContest(item.key);
+    card.append(tag, title, time, button);
+    list.append(card);
+  }
+}
+api.onContests(renderContests);
+$("#refresh-contests").onclick = async () => {
+  try {
+    renderContests(await api.refreshContests());
+  } catch {
+    toast("赛程刷新失败，请稍后重试。", true);
+  }
+};
+$("#contest-settings").onclick = () => {
+  switchTab("settings");
+  $("#contest-reminders").scrollIntoView({ block: "center" });
+};

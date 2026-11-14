@@ -37,7 +37,9 @@
       ><button data-tab="music" aria-selected="false">
         听歌 <span>MUSIC</span></button
       ><button data-tab="settings" aria-selected="false">
-        设置 <span>SETTINGS</span>
+        设置 <span>SETTINGS</span></button
+      ><button data-tab="contests" aria-selected="false">
+        比赛 <span>CONTESTS</span>
       </button>
     </nav>
     <main>
@@ -96,8 +98,8 @@
           <span>01 / 桌边的小小剧场</span>
           <h2>想和她玩一会儿？</h2>
           <p>
-            17 种动作 · 30 组原创台词 · 共 300 句<br />离线互动，不调用
-            API。同组台词轮换抽取，避免重复。
+            <span id="dialogue-count" data-no-localize></span
+            ><br />离线互动，不调用 API。同组台词轮换抽取，避免重复。
           </p>
         </div>
         <div class="scene-menu" aria-label="海风小剧场">
@@ -145,6 +147,9 @@
             data-no-localize
           ></select></label
         ><button id="speak-line" class="secondary wide">让她说一句 ↗</button>
+        <button id="speak-now" class="secondary wide">
+          听听现在的海风 / 时间台词 ↗
+        </button>
         <div class="section-rule"></div>
         <div class="section-heading">
           <span>02 / 一起去看她的来处</span>
@@ -203,6 +208,35 @@
         ></audio>
         <p class="footnote">
           在线播放可能受平台、地区或登录状态影响；无法播放时可在浏览器打开原作，或选择本地文件。音乐不会随程序启动自动播放。
+        </p>
+      </section>
+      <section id="contests-tab" class="tab-content hidden scrollable">
+        <div class="section-heading">
+          <span>05 / 出发前的小小铃声</span>
+          <h2>比赛快开始啦</h2>
+          <p>
+            Codeforces / AtCoder · 提前 5 分钟提醒<br />时间按本机时区显示。隐藏桌宠后仍可提醒。
+          </p>
+        </div>
+        <p class="hint">
+          请让 Migrate
+          保持运行并连接网络。退出程序或电脑休眠期间无法弹出提醒；比赛报名需自行完成。
+        </p>
+        <div class="row-buttons">
+          <button id="refresh-contests" class="primary">刷新赛程</button
+          ><button id="contest-settings" class="secondary">提醒设置</button>
+        </div>
+        <div
+          id="contest-status"
+          class="hint"
+          role="status"
+          data-no-localize
+        ></div>
+        <div id="contest-list" class="contest-list" data-no-localize></div>
+        <p class="footnote">
+          来源：Codeforces 官方 API、AtCoder 官方赛程页。每 10 分钟刷新，每 15
+          秒检查提醒；同一场比赛只提醒一次。提醒窗口约 45
+          秒后自动收起，点击比赛可打开官方网站。
         </p>
       </section>
       <section id="settings-tab" class="tab-content hidden scrollable">
@@ -307,6 +341,59 @@
             平时保持安静站姿，动作结束后自然收势。关闭自动动作后只在你操作时回应。
           </p>
           <label class="toggle-row"
+            ><span>跟着时间说话<small>晨光、用餐、午后、日落与晚安</small></span
+            ><input id="time-aware" type="checkbox" class="toggle" checked
+          /></label>
+          <label class="toggle-row"
+            ><span
+              >喝水与伸展小提醒<small
+                >约半小时一次，需要开启自动动作与时间台词</small
+              ></span
+            ><input id="rest-reminders" type="checkbox" class="toggle" checked
+          /></label>
+          <label class="toggle-row"
+            ><span
+              >整点报时<small>安静的小动作，不播放声音；默认关闭</small></span
+            ><input id="hourly-chime" type="checkbox" class="toggle"
+          /></label>
+          <p class="hint">
+            时间互动会避开正在进行的动作和对话，至少间隔 10
+            分钟；隐藏桌宠时不会补发一串台词。
+          </p>
+          <div class="section-rule"></div>
+          <h3 class="small-heading">比赛赛前提醒</h3>
+          <label class="toggle-row"
+            ><span
+              >提前 5 分钟提醒比赛<small
+                >独立于自动动作，隐藏桌宠后也有效</small
+              ></span
+            ><input
+              id="contest-reminders"
+              type="checkbox"
+              class="toggle"
+              checked
+          /></label>
+          <label class="toggle-row"
+            ><span>Codeforces<small>官方常规赛程，不包含 Gym</small></span
+            ><input
+              id="codeforces-reminders"
+              type="checkbox"
+              class="toggle"
+              checked
+          /></label>
+          <label class="toggle-row"
+            ><span>AtCoder<small>官方预定比赛与每日比赛</small></span
+            ><input
+              id="atcoder-reminders"
+              type="checkbox"
+              class="toggle"
+              checked
+          /></label>
+          <p class="hint">
+            需保持程序运行与网络连接；只读取公开赛程，不需要比赛账号或 API
+            Key。在「比赛」页查看下次比赛。
+          </p>
+          <label class="toggle-row"
             ><span>开机启动<small>登录 Windows 时自动来报到</small></span
             ><input id="launch-at-login" type="checkbox" class="toggle"
           /></label>
@@ -339,6 +426,7 @@
     <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
     <script src="../node_modules/opencc-js/dist/umd/full.js"></script>
     <script src="i18n.js"></script>
+    <script src="time-dialogue.js"></script>
     <script src="dialogue.js"></script>
     <script src="scenes.js"></script>
     <script src="panel.js"></script>

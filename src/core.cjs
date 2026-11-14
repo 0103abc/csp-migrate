@@ -20,6 +20,12 @@ const DEFAULTS = Object.freeze({
   size: 1,
   autoActions: true,
   idleInterval: 90,
+  timeAware: true,
+  hourlyChime: false,
+  restReminders: true,
+  contestReminders: true,
+  codeforcesReminders: true,
+  atcoderReminders: true,
   alwaysOnTop: true,
   launchAtLogin: false,
   persona: DEFAULT_PERSONA,
@@ -66,7 +72,17 @@ function validateSettings(raw, previous = DEFAULTS) {
       throw new Error("请选择有效的自动动作间隔。");
     next.idleInterval = interval;
   }
-  for (const key of ["autoActions", "alwaysOnTop", "launchAtLogin"]) {
+  for (const key of [
+    "autoActions",
+    "alwaysOnTop",
+    "launchAtLogin",
+    "timeAware",
+    "hourlyChime",
+    "restReminders",
+    "contestReminders",
+    "codeforcesReminders",
+    "atcoderReminders",
+  ]) {
     if (key in raw) {
       if (typeof raw[key] !== "boolean")
         throw new Error("开关设置格式不正确。");

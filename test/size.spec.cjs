@@ -16,6 +16,7 @@ test("pet remains fully visible and returns to bottom right at 70%, 100%, 150% a
       ...require("../src/core.cjs").DEFAULTS,
       shortcut: "Ctrl+Alt+F9",
       autoActions: false,
+      contestReminders: false,
       alwaysOnTop: false,
     }),
   );

@@ -17,6 +17,7 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
       shortcut: "Ctrl+Alt+F11",
       alwaysOnTop: false,
       autoActions: false,
+      contestReminders: false,
     }),
   );
   const requests = [],
@@ -98,8 +99,8 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
     await expect
       .poll(() =>
         pet
-          .locator("#turn-sprite")
-          .evaluate((element) => element.getAnimations().length),
+          .locator("#turn-canvas")
+          .evaluate((element) => Number(element.dataset.progress)),
       )
       .toBeGreaterThan(0);
     await pet.evaluate(() => {
@@ -243,7 +244,7 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
     await expect(panel.locator('[data-control="pause"]')).toBeDisabled();
     await panel.locator('[data-control="end"]').click();
     await expect(panel.locator("[data-action]")).toHaveCount(17);
-    await expect(panel.locator("#dialogue-group option")).toHaveCount(30);
+    await expect(panel.locator("#dialogue-group option")).toHaveCount(42);
     await panel.locator('[data-action="birds"]').click();
     await expect(pet.locator("#pet")).toHaveClass(/birds/);
     await panel.locator("#dialogue-group").selectOption("encourage");

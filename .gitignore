@@ -9,6 +9,8 @@ playwright-report/
 userdata/
 settings.json
 settings.json.tmp
+contest-cache.json
+contest-cache.json.tmp
 *.pem
 *.key
 .DS_Store

@@ -1,0 +1,78 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 15px 18px;
+  color: #355776;
+  background: linear-gradient(140deg, #f9fcff, #eaf3fc);
+  font:
+    12px/1.6 "Segoe UI",
+    "Microsoft YaHei",
+    sans-serif;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  letter-spacing: 1px;
+  color: #6485a0;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  background: #244d72;
+  color: #fff;
+  padding: 7px 12px;
+}
+#close {
+  background: transparent;
+  color: #6d88a0;
+  font-size: 23px;
+  padding: 0 3px;
+  line-height: 1;
+}
+main {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  margin: 10px 0;
+}
+main img {
+  width: 53px;
+  height: 53px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+h1 {
+  font-size: 18px;
+  margin: 0;
+}
+p {
+  margin: 3px 0;
+  font-size: 11px;
+}
+#names {
+  white-space: pre-line;
+  font-size: 12px;
+  font-weight: 600;
+  height: 57px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+footer small {
+  color: #7893a9;
+}
+button:focus-visible {
+  outline: 2px solid #65a9e4;
+  outline-offset: 2px;
+}

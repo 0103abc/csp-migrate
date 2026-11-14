@@ -4,6 +4,13 @@ const api = window.migrate,
   sprite = document.querySelector("#sprite"),
   bubble = document.querySelector("#bubble");
 const turnSprite = document.querySelector("#turn-sprite");
+const turnPlayer = new window.MigrateTurnPlayer.TurnPlayer(
+  document.querySelector("#turn-canvas"),
+  sprite,
+);
+const clockEvents = window.MigrateClockEvents;
+let clockState = clockEvents.createState(),
+  queuedTurn = false;
 const dialogue = window.MigrateDialogue;
 for (const selector of ["#bubble", "#hide"])
   document.querySelector(selector).setAttribute("data-no-localize", "");
@@ -136,6 +143,14 @@ const choreography = {
 const T = (value) =>
   window.MigrateI18n.text(value, settings?.locale || "zh-CN");
 function say(text, duration = 5000) {
+  text = text.replaceAll(
+    "{time}",
+    new Intl.DateTimeFormat("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date()),
+  );
   clearTimeout(bubbleTimer);
   bubble.dataset.original = text;
   bubble.textContent = T(text);
@@ -146,6 +161,8 @@ function frame(name) {
   sprite.src = `../assets/${sprites[name] || name}.png`;
 }
 function cancelTurn() {
+  turnPlayer.cancel();
+  queuedTurn = false;
   ++turnGeneration;
   for (const timer of poseTimers) clearTimeout(timer);
   poseTimers = [];
@@ -182,63 +199,25 @@ async function blendPose(pose, generation, duration = 330) {
 }
 async function smoothTurn() {
   turning = true;
+  active = "turn";
   back = !back;
-  const generation = ++turnGeneration,
-    direction = back ? 1 : -1;
+  const generation = ++turnGeneration;
   pet.classList.add("turning");
   say(back ? "让我看看，风是从哪儿来的……" : "我回来啦。你在这里，真好。");
-  const poses = back ? ["side", "back"] : ["side", "idle"];
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    frame(poses.at(-1));
-    turning = false;
-    pet.classList.remove("turning");
-    return;
-  }
-  for (const pose of poses) {
-    if (generation !== turnGeneration) return;
-    turnSprite.src = `../assets/${sprites[pose] || pose}.png`;
-    await turnSprite.decode().catch(() => {});
-    if (generation !== turnGeneration) return;
-    const options = {
-      duration: 360,
-      easing: "cubic-bezier(.25,.1,.25,1)",
-      fill: "forwards",
-    };
-    turnAnimations = [
-      sprite.animate(
-        [
-          { opacity: 1, transform: "translateX(0) rotateY(0deg)" },
-          {
-            opacity: 0,
-            transform: `translateX(${direction * 5}px) rotateY(${direction * 25}deg)`,
-          },
-        ],
-        options,
-      ),
-      turnSprite.animate(
-        [
-          {
-            opacity: 0,
-            transform: `translateX(${-direction * 5}px) rotateY(${-direction * 25}deg)`,
-          },
-          { opacity: 1, transform: "translateX(0) rotateY(0deg)" },
-        ],
-        options,
-      ),
-    ];
-    await Promise.all(
-      turnAnimations.map((animation) => animation.finished.catch(() => {})),
-    );
-    if (generation !== turnGeneration) return;
-    frame(pose);
-    await sprite.decode().catch(() => {});
-    for (const animation of turnAnimations) animation.cancel();
-    turnAnimations = [];
-    turnSprite.style.opacity = "0";
-  }
+  const target = back ? "back" : "idle";
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+    await turnPlayer.play(!back, `../assets/${target}.png`);
   if (generation === turnGeneration) {
+    frame(target);
     turning = false;
     pet.classList.remove("turning");
+    pet.classList.add("idle");
+    active = "idle";
+    lastActivity = Date.now();
+    if (queuedTurn) {
+      queuedTurn = false;
+      smoothTurn();
+    }
   }
 }
 const actionGroups = {
@@ -258,11 +237,19 @@ const actionGroups = {
   peek: "idle",
 };
 function perform(value, group) {
+  if (value && typeof value === "object" && value.contestText) {
+    perform("wave");
+    say(value.contestText, 15000);
+    return;
+  }
   if (value && typeof value === "object") {
     group = Object.hasOwn(dialogue.groups, value.group) ? value.group : "idle";
     value = dialogue.groups[group].action;
   }
-  if (value === "turn" && turning) return;
+  if (value === "turn" && turning) {
+    queuedTurn = !queuedTurn;
+    return;
+  }
   cancelTurn();
   clearTimeout(actionTimer);
   clearInterval(talkTimer);
@@ -303,7 +290,20 @@ function perform(value, group) {
     document.querySelector("#sparkles").textContent =
       value === "shy" ? "♡" : value === "sleep" ? "z" : "✧";
   }
-  if (choreography[value]) {
+  if (value === "looksea") {
+    const generation = turnGeneration;
+    pet.classList.add("turning");
+    void turnPlayer.play(false, "../assets/back.png").then((completed) => {
+      if (!completed || generation !== turnGeneration) return;
+      poseTimers.push(
+        setTimeout(async () => {
+          if (generation !== turnGeneration) return;
+          await turnPlayer.play(true, "../assets/idle.png");
+          if (generation === turnGeneration) pet.classList.remove("turning");
+        }, 2900),
+      );
+    });
+  } else if (choreography[value]) {
     const generation = turnGeneration;
     poseTimers = choreography[value].poses.map(([at, pose]) =>
       setTimeout(() => blendPose(pose, generation), at),
@@ -338,6 +338,12 @@ function layoutStage() {
   stage.style.transform = `scale(${scale})`;
 }
 function update(value) {
+  if (
+    settings &&
+    (settings.timeAware !== value.timeAware ||
+      settings.autoActions !== value.autoActions)
+  )
+    clockState = clockEvents.createState();
   settings = value;
   applyLocale(value.locale);
   if (bubble.dataset.original) bubble.textContent = T(bubble.dataset.original);
@@ -403,10 +409,37 @@ setInterval(() => {
     settings?.autoActions &&
     !document.hidden &&
     !dragStart &&
+    active === "idle"
+  ) {
+    const due = clockEvents.takeDue(new Date(), clockState, settings);
+    if (due) {
+      perform({ group: due.group });
+      return;
+    }
+  }
+  if (
+    settings?.autoActions &&
+    !document.hidden &&
+    !dragStart &&
     active === "idle" &&
     Date.now() - lastActivity > (settings.idleInterval || 90) * 1000
   ) {
-    perform({ group: dialogue.ambientGroup() });
+    perform({
+      group: dialogue.ambientGroup(new Date(), Math.random, settings.timeAware),
+    });
   }
 }, 7000);
 say(dialogue.sample(dialogue.timeGroup()), 9000);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    cancelTurn();
+    clearTimeout(actionTimer);
+    clearInterval(talkTimer);
+    pet.className = "pet idle";
+    frame(back ? "back" : "idle");
+    active = "idle";
+  } else {
+    clockState = clockEvents.createState();
+    lastActivity = Date.now();
+  }
+});

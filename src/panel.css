@@ -10,6 +10,40 @@
 * {
   box-sizing: border-box;
 }
+.contest-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.contest-card {
+  padding: 16px;
+  border: 1px solid #d5e1ef;
+  border-radius: 16px;
+  background: #fff;
+}
+.contest-card h3 {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.contest-card p {
+  color: #677c92;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.contest-tag {
+  color: #497b9b;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+#contest-status {
+  white-space: pre-line;
+  line-height: 1.8;
+}
+#speak-now {
+  margin-top: 8px;
+}
 html,
 body {
   margin: 0;

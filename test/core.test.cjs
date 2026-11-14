@@ -97,13 +97,13 @@ test("four offline life scenes have complete ordered storyboards and matching ar
     }
   }
 });
-test("offline dialogue has 30 groups and 300 unique lines, without immediate or within-bag repeats", () => {
+test("offline dialogue has 42 groups and 420 unique lines, without immediate or within-bag repeats", () => {
   const d = require("../src/dialogue.js");
-  assert.equal(Object.keys(d.groups).length, 30);
-  assert.equal(d.count, 300);
+  assert.equal(Object.keys(d.groups).length, 42);
+  assert.equal(d.count, 420);
   assert.equal(
     new Set(Object.values(d.groups).flatMap((group) => group.lines)).size,
-    300,
+    420,
   );
   const firstBag = Array.from({ length: 10 }, () => d.sample("wave"));
   assert.equal(new Set(firstBag).size, 10);
