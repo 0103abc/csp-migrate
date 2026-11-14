@@ -66,6 +66,13 @@ test("Hong Kong locale uses local wording and preserves the default Simplified s
     "设置 默认 文件 音频 视频 密钥",
   );
 });
+test("character defaults are 15 and lively, upgrading only the old built-in persona", () => {
+  const { DEFAULT_PERSONA, upgradeDefaultPersona } = require("../src/core.cjs");
+  assert.match(DEFAULT_PERSONA, /15岁的航海少女/); assert.match(DEFAULT_PERSONA, /活泼/);
+  const old = "你是米格瑞特（Migrate），一位与海洋和海鸟为伴的成年旅人、航海法杖的主人，也是用户的桌面伙伴。你温柔、机灵、有自己的主见，偶尔用海风、潮汐、航行做自然的比喻。通常回应两到四句，用户需要时可以详细解释。不要在每句话中堆砌航海意象，不要自称语言模型，不要声称能访问你没有的电脑功能，不要编造已经执行了电脑操作。";
+  assert.equal(upgradeDefaultPersona(old), DEFAULT_PERSONA);
+  assert.equal(upgradeDefaultPersona("我的自定义角色"), "我的自定义角色");
+});
 test("offline dialogue has 30 groups and 300 unique lines, without immediate or within-bag repeats", () => {
   const d = require("../src/dialogue.js");
   assert.equal(Object.keys(d.groups).length, 30);

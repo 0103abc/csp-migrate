@@ -21,6 +21,7 @@ const {
   validateSettings,
   clampBounds,
   requestChat,
+  upgradeDefaultPersona,
 } = require("./core.cjs");
 const { text: localize } = require("./i18n.js");
 const dialogue = require("./dialogue.js");
@@ -97,6 +98,7 @@ async function loadSettings() {
   try {
     const value = JSON.parse(fs.readFileSync(settingsPath(), "utf8"));
     settings = validateSettings(value);
+    settings.persona = upgradeDefaultPersona(settings.persona);
     if (
       value.position &&
       Number.isFinite(value.position.x) &&
