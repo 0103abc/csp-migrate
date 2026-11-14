@@ -137,6 +137,7 @@ function broadcastSettings() {
     panel.setTitle(localize("Migrate · 对话与设置", settings.locale));
 }
 function guardedWindow(options, file) {
+  const passiveTest = process.env.MIGRATE_PASSIVE_TEST === "1";
   const win = new BrowserWindow({
     show: false,
     frame: false,
@@ -154,20 +155,29 @@ function guardedWindow(options, file) {
       spellcheck: false,
     },
     ...options,
+    ...(passiveTest ? { opacity: 0, focusable: false, skipTaskbar: true } : {}),
   });
+  if (passiveTest) win.setIgnoreMouseEvents(true, { forward: true });
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event) => event.preventDefault());
   win.loadFile(file);
   return win;
 }
 function petBounds(home = false) {
-  const width = Math.round(320 * settings.size),
-    height = Math.round(420 * settings.size);
   const pos = home ? null : settings.position;
   const display = pos
     ? screen.getDisplayNearestPoint(pos)
     : screen.getPrimaryDisplay();
   const area = display.workArea;
+  // Keep the usual edge clearance even when the requested size exceeds a screen.
+  const width = Math.min(
+      Math.round(320 * settings.size),
+      Math.max(1, area.width - 12),
+    ),
+    height = Math.min(
+      Math.round(420 * settings.size),
+      Math.max(1, area.height - 8),
+    );
   return clampBounds(
     {
       width,

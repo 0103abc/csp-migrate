@@ -329,17 +329,25 @@ function perform(value, group) {
               : 5000),
     );
 }
+function layoutStage() {
+  if (!settings || !innerWidth || !innerHeight) return;
+  const stage = document.querySelector("#stage");
+  // The native window may be clamped to the monitor or rounded by Windows DPI.
+  // Fit the whole design; CSS anchors it to the actual client area's bottom right.
+  const scale = Math.min(settings.size, innerWidth / 320, innerHeight / 420);
+  stage.style.transform = `scale(${scale})`;
+}
 function update(value) {
   settings = value;
   applyLocale(value.locale);
   if (bubble.dataset.original) bubble.textContent = T(bubble.dataset.original);
-  document.querySelector("#stage").style.transform = `scale(${value.size})`;
-  document.querySelector("#stage").style.width = "320px";
-  document.querySelector("#stage").style.height = "420px";
+  layoutStage();
   document.querySelector("#hide").title = T(`隐藏（${value.shortcut} 呼出）`);
 }
 api.getSettings().then(update);
 api.onSettings(update);
+window.addEventListener("resize", layoutStage);
+new ResizeObserver(layoutStage).observe(document.documentElement);
 api.onAction(perform);
 document.querySelector("#chat").onclick = () => api.openPanel("chat");
 document.querySelector("#settings").onclick = () => api.openPanel("settings");

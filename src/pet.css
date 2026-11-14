@@ -17,8 +17,11 @@ button {
 }
 #stage {
   position: absolute;
-  inset: 0;
-  transform-origin: bottom left;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  height: 420px;
+  transform-origin: bottom right;
 }
 .pet {
   position: absolute;

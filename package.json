@@ -1,7 +1,7 @@
 {
   "name": "csp-migrate",
   "productName": "Migrate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "米格瑞特 Migrate · 海风与你同在的 Windows 桌面伙伴",
   "main": "src/main.cjs",
   "author": "csp-migrate contributors",

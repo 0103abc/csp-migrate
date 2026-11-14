@@ -1,5 +1,7 @@
 # csp-migrate · 米格瑞特桌宠
 
+**最新版本 v1.0.1**：修复 150% 缩放裁切和无法正确回到右下角的问题，增加小屏幕自动适配。[查看完整更新日志](CHANGELOG.md)
+
 银发、蓝眼、航海法杖，还有一小片海风。基于用户提供的米格瑞特（Migrate）设定制作的 Windows 透明桌面伙伴。
 
 角色设定为 **15 岁的航海少女**，活泼、好奇、机灵，偶尔俏皮，做题时认真可靠。初期版本的默认角色设定会在启动时更新；自行编辑过的角色设定会保留。
@@ -8,7 +10,7 @@
 
 ## 直接使用
 
-从 [Releases](https://github.com/0103abc/csp-migrate/releases) 下载 `Migrate-1.0.0-win-x64.zip`，**完整解压**后运行 `Migrate.exe`。无需安装 Node.js；请保留 exe 同目录下的运行文件。
+从 [Releases](https://github.com/0103abc/csp-migrate/releases) 下载 `Migrate-1.0.1-win-x64.zip`，**完整解压**后运行 `Migrate.exe`。无需安装 Node.js；请保留 exe 同目录下的运行文件。
 
 首次出现于主屏幕工作区右下角，自动避开任务栏。支持 Windows 10/11 x64。
 

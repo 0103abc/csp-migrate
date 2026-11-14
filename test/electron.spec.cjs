@@ -60,6 +60,7 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
       env: {
         ...process.env,
         MIGRATE_USER_DATA: path.join(scratch, "userdata"),
+        MIGRATE_PASSIVE_TEST: "1",
       },
     });
     const pet = await app.firstWindow();

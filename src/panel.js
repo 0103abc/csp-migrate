@@ -23,6 +23,7 @@ for (const selector of [
   "#save-settings",
 ])
   $(selector).setAttribute("data-no-localize", "");
+$(".version").setAttribute("data-no-localize", "");
 const applyLocale = window.MigrateI18n.bindDocument(document);
 const T = (value) =>
   window.MigrateI18n.text(value, settings?.locale || "zh-CN");
@@ -69,6 +70,8 @@ function update(value, fillForm = false) {
   $("#connection-dot").classList.toggle("connected", value.hasKey);
   $("#key-status").textContent = T(value.hasKey ? "已加密保存" : "未设置");
   $("#model-label").textContent = value.model;
+  $(".version").textContent =
+    `MIGRATE / v${value.version} · ${T("愿每一次停靠，都有海风。")}`;
   scenePlayer?.refreshLocale();
   const currentGroup = $("#dialogue-group").value;
   $("#dialogue-group").replaceChildren(
