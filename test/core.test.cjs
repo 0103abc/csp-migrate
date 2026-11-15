@@ -53,6 +53,7 @@ test("validates settings and never copies arbitrary fields into persisted config
   assert.equal(result.encryptedKey, "");
   assert.equal(DEFAULTS.locale, "zh-CN");
   assert.equal(validateSettings({ locale: "zh-HK" }).locale, "zh-HK");
+  assert.equal(validateSettings({locale:'zh-TW'}).locale,'zh-TW');
   assert.throws(() => validateSettings({ locale: "en-US" }));
 });
 test("Hong Kong locale uses local wording and preserves the default Simplified strings", () => {
@@ -97,13 +98,13 @@ test("four offline life scenes have complete ordered storyboards and matching ar
     }
   }
 });
-test("offline dialogue has 42 groups and 420 unique lines, without immediate or within-bag repeats", () => {
+test("offline dialogue has 46 groups and 460 unique lines, without immediate or within-bag repeats", () => {
   const d = require("../src/dialogue.js");
-  assert.equal(Object.keys(d.groups).length, 42);
-  assert.equal(d.count, 420);
+  assert.equal(Object.keys(d.groups).length, 46);
+  assert.equal(d.count, 460);
   assert.equal(
     new Set(Object.values(d.groups).flatMap((group) => group.lines)).size,
-    420,
+    460,
   );
   const firstBag = Array.from({ length: 10 }, () => d.sample("wave"));
   assert.equal(new Set(firstBag).size, 10);

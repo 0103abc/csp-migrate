@@ -38,6 +38,7 @@ const path = require("node:path");
       /^\/playwright\.config\.cjs$/,
       /^\/assets\/migrate-atlas\.png$/,
       /^\/assets\/turn-atlas\.png$/,
+      /^\/assets\/entry-atlas\.png$/,
       /^\/assets\/(?:scenes-atlas|home-backgrounds-atlas)\.png$/,
     ],
   });

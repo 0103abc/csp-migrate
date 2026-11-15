@@ -101,6 +101,14 @@ const sharp = require("sharp"),
     .composite(pieces)
     .png()
     .toFile(path.join(dir, "turn-strip.png"));
+  for (const [index, name] of [
+    [0, "standing-front"],
+    [15, "standing-back"],
+  ])
+    await sharp(path.join(dir, "turn-strip.png"))
+      .extract({ left: index * w, top: 0, width: w, height: h })
+      .png()
+      .toFile(path.join(dir, name + ".png"));
   fs.writeFileSync(
     path.join(dir, "turn-strip.json"),
     JSON.stringify({

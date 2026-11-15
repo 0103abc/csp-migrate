@@ -118,7 +118,7 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
       )
       .toBe(false);
     await pet.evaluate(() => window.migrate.action("turn"));
-    await expect(pet.locator("#sprite")).toHaveAttribute("src", /idle\.png/);
+    await expect(pet.locator("#sprite")).toHaveAttribute("src", /standing-front\.png/);
     const panelPromise = app.waitForEvent("window");
     await pet.evaluate(() => window.migrate.openPanel("settings"));
     const panel = await panelPromise;
@@ -243,8 +243,8 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
     });
     await expect(panel.locator('[data-control="pause"]')).toBeDisabled();
     await panel.locator('[data-control="end"]').click();
-    await expect(panel.locator("[data-action]")).toHaveCount(17);
-    await expect(panel.locator("#dialogue-group option")).toHaveCount(42);
+    await expect(panel.locator("[data-action]")).toHaveCount(20);
+    await expect(panel.locator("#dialogue-group option")).toHaveCount(46);
     await panel.locator('[data-action="birds"]').click();
     await expect(pet.locator("#pet")).toHaveClass(/birds/);
     await panel.locator("#dialogue-group").selectOption("encourage");

@@ -239,6 +239,98 @@
   color: #91a1af;
   letter-spacing: 1px;
 }
+.scene-entry {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 91px;
+  height: 185px;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s;
+}
+.scene-stage[data-story="home"][data-shoes="outside"] .scene-entry,
+.scene-stage[data-story="home"][data-shoes="off"] .scene-entry {
+  opacity: 1;
+}
+.entry-opening {
+  position: absolute;
+  inset: 0 13px 23px 0;
+  background: linear-gradient(#a7cee5 60%, #c6b99f 61%);
+  box-shadow: inset -3px 0 12px #1b364938;
+}
+.entry-frame {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  bottom: 0;
+  width: 14px;
+  background: linear-gradient(90deg, #cda776, #997147 80%);
+  box-shadow: 3px 1px 6px #253a4533;
+}
+.entry-mat {
+  position: absolute;
+  bottom: 1px;
+  left: 0;
+  width: 73px;
+  height: 20px;
+  background: #b29970;
+  border-radius: 50%;
+  transform: rotate(-6deg);
+}
+.entry-boots {
+  position: absolute;
+  bottom: 8px;
+  left: 14px;
+  width: 46px;
+  height: 55px;
+  object-fit: contain;
+  object-position: bottom;
+}
+.scene-stage[data-phase="removing-shoes"] .scene-actor {
+  animation: shoe-balance 3s ease-in-out 1;
+}
+.scene-stage[data-phase="placing-shoes"] .entry-boots {
+  animation: boots-settle 1.1s ease-out 1;
+}
+.scene-stage[data-phase="entering"][data-story="home"] .scene-actor {
+  animation: step-inside 2.8s ease-in-out 1 both;
+}
+@keyframes shoe-balance {
+  0%,
+  100% {
+    transform: none;
+  }
+  35%,
+  65% {
+    transform: translateY(2px) rotate(-2deg);
+  }
+}
+@keyframes boots-settle {
+  0% {
+    opacity: 0;
+    transform: translate(35px, -32px) rotate(12deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes step-inside {
+  0% {
+    transform: translateX(-44px) scale(0.94);
+  }
+  50% {
+    transform: translateX(-15px) translateY(-3px) scale(0.98);
+  }
+  100% {
+    transform: none;
+  }
+}
 @keyframes followpath {
   0% {
     transform: translateX(-77px) scale(0.92);

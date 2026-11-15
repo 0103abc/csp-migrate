@@ -64,6 +64,10 @@ const allowedActions = new Set([
   "nod",
   "shake",
   "bounce",
+  "jump",
+  "blink",
+  "headpat",
+  "curious",
   "float",
   "birds",
   "stretch",
@@ -420,6 +424,8 @@ function menuTemplate() {
         { label: "认真点头", click: () => action("nod") },
         { label: "轻轻摇头", click: () => action("shake") },
         { label: "轻跃一下", click: () => action("bounce") },
+        { label: "跳起来", click: () => action("jump") },
+        { label: "眨眨眼", click: () => action("blink") },
         { label: "伸展身体", click: () => action("stretch") },
         { label: "有点害羞", click: () => action("shy") },
         { label: "随风摇摆", click: () => action("sway") },
@@ -448,7 +454,12 @@ function menuTemplate() {
 }
 function openProblem() {
   send(pet, "pet:animate", { group: "problem" });
-  const language = settings.locale === "zh-HK" ? "yue_hk" : "zh_cn";
+  const language =
+    settings.locale === "zh-HK"
+      ? "yue_hk"
+      : settings.locale === "zh-TW"
+        ? "zh_tw"
+        : "zh_cn";
   shell
     .openExternal(`https://qoj.ac/problem/24562/statement/${language}`)
     .catch(() => {});

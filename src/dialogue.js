@@ -493,6 +493,11 @@
       ? require("./time-dialogue.js")
       : globalThis.MigrateTimeDialogue;
   Object.assign(groups, timeExtras || {});
+  const reactions =
+    typeof module === "object" && module.exports
+      ? require("./reactions.js")
+      : globalThis.MigrateReactions;
+  Object.assign(groups, reactions?.groups || {});
   function sample(id, random = Math.random) {
     const group = groups[id] || groups.idle;
     let bag = bags.get(id);
@@ -552,6 +557,9 @@
       "float",
       "stretch",
       "shy",
+      "jump",
+      "curious",
+      "blink",
     ];
     if (timeAware && [0, 6].includes(date.getDay())) ids.push("weekend");
     if (timeAware && date.getHours() >= 20) ids.push("stars", "night", "sleep");

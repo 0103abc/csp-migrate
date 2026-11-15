@@ -16,24 +16,28 @@ for (const selector of ["#bubble", "#hide"])
   document.querySelector(selector).setAttribute("data-no-localize", "");
 const applyLocale = window.MigrateI18n.bindDocument(document);
 const sprites = {
-  idle: "idle",
+  idle: "standing-front",
   wave: "wave",
-  back: "back",
+  back: "standing-back",
   magic: "magic",
   happy: "happy",
   sleep: "sleep",
   walk: "side",
   talk: "talk",
-  nod: "idle",
-  shake: "idle",
+  nod: "standing-front",
+  shake: "standing-front",
   bounce: "happy",
   float: "magic",
   birds: "magic",
   stretch: "wave",
   shy: "talk",
-  sway: "idle",
-  looksea: "back",
+  sway: "standing-front",
+  looksea: "standing-back",
   peek: "side",
+  jump: "happy",
+  blink: "standing-front",
+  headpat: "standing-front",
+  curious: "standing-front",
 };
 const images = Object.values(sprites).map((name) => {
   const img = new Image();
@@ -53,6 +57,11 @@ let settings = null,
   turnAnimations = [],
   turning = false,
   poseTimers = [];
+let faceTimers = [],
+  headDwell = null,
+  headInside = false,
+  lastHeadPat = -Infinity,
+  nextMicro = Date.now() + 18000;
 const choreography = {
   wave: {
     duration: 6100,
@@ -159,8 +168,18 @@ function say(text, duration = 5000) {
 }
 function frame(name) {
   sprite.src = `../assets/${sprites[name] || name}.png`;
+  sprite.dataset.pose = name;
+  pet.classList.toggle(
+    "front-face",
+    (sprites[name] || name) === "standing-front",
+  );
 }
 function cancelTurn() {
+  clearTimeout(headDwell);
+  headDwell = null;
+  faceTimers.forEach(clearTimeout);
+  faceTimers = [];
+  pet.classList.remove("blinking", "eyes-closed");
   turnPlayer.cancel();
   queuedTurn = false;
   ++turnGeneration;
@@ -175,6 +194,7 @@ async function blendPose(pose, generation, duration = 330) {
   if (generation !== turnGeneration) return;
   const url = `../assets/${sprites[pose] || pose}.png`;
   if (sprite.getAttribute("src") === url) return;
+  pet.classList.remove("front-face");
   turnSprite.src = url;
   await turnSprite.decode().catch(() => {});
   if (generation !== turnGeneration) return;
@@ -206,7 +226,7 @@ async function smoothTurn() {
   say(back ? "让我看看，风是从哪儿来的……" : "我回来啦。你在这里，真好。");
   const target = back ? "back" : "idle";
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
-    await turnPlayer.play(!back, `../assets/${target}.png`);
+    await turnPlayer.play(!back, `../assets/${sprites[target]}.png`);
   if (generation === turnGeneration) {
     frame(target);
     turning = false;
@@ -235,8 +255,12 @@ const actionGroups = {
   sway: "sway",
   looksea: "sea",
   peek: "idle",
+  jump: "jump",
+  blink: "blink",
+  headpat: "headpat",
+  curious: "curious",
 };
-function perform(value, group) {
+function perform(value, group, quiet = false) {
   if (value && typeof value === "object" && value.contestText) {
     perform("wave");
     say(value.contestText, 15000);
@@ -253,7 +277,7 @@ function perform(value, group) {
   cancelTurn();
   clearTimeout(actionTimer);
   clearInterval(talkTimer);
-  lastActivity = Date.now();
+  if (!quiet) lastActivity = Date.now();
   pet.className = "pet";
   active = value;
   if (value === "turn") {
@@ -281,7 +305,7 @@ function perform(value, group) {
   } else {
     frame(choreography[value] ? "idle" : sprites[value] ? value : "idle");
     pet.classList.add(value);
-    if (group || actionGroups[value])
+    if (!quiet && (group || actionGroups[value]))
       say(
         dialogue.sample(group || actionGroups[value]),
         value === "sleep" ? 8000 : 6500,
@@ -290,19 +314,29 @@ function perform(value, group) {
     document.querySelector("#sparkles").textContent =
       value === "shy" ? "♡" : value === "sleep" ? "z" : "✧";
   }
+  if (value === "headpat" || value === "curious") {
+    pet.classList.add("head-motion");
+    if (value === "headpat") {
+      lastHeadPat = Date.now();
+      faceTimers.push(setTimeout(() => blinkFace(true), 600));
+    }
+  }
+  if (value === "blink") blinkFace(true);
   if (value === "looksea") {
     const generation = turnGeneration;
     pet.classList.add("turning");
-    void turnPlayer.play(false, "../assets/back.png").then((completed) => {
-      if (!completed || generation !== turnGeneration) return;
-      poseTimers.push(
-        setTimeout(async () => {
-          if (generation !== turnGeneration) return;
-          await turnPlayer.play(true, "../assets/idle.png");
-          if (generation === turnGeneration) pet.classList.remove("turning");
-        }, 2900),
-      );
-    });
+    void turnPlayer
+      .play(false, "../assets/standing-back.png")
+      .then((completed) => {
+        if (!completed || generation !== turnGeneration) return;
+        poseTimers.push(
+          setTimeout(async () => {
+            if (generation !== turnGeneration) return;
+            await turnPlayer.play(true, "../assets/standing-front.png");
+            if (generation === turnGeneration) pet.classList.remove("turning");
+          }, 2900),
+        );
+      });
   } else if (choreography[value]) {
     const generation = turnGeneration;
     poseTimers = choreography[value].poses.map(([at, pose]) =>
@@ -318,8 +352,9 @@ function perform(value, group) {
   }
   if (value !== "idle")
     actionTimer = setTimeout(
-      () => perform("idle"),
-      choreography[value]?.duration ||
+      () => perform("idle", undefined, quiet),
+      { jump: 1900, blink: 1800, headpat: 2800, curious: 2500 }[value] ||
+        choreography[value]?.duration ||
         (value === "sleep"
           ? 14000
           : value === "talk"
@@ -328,6 +363,17 @@ function perform(value, group) {
               ? 1400
               : 5000),
     );
+}
+function blinkFace(double = false) {
+  if (document.hidden || !pet.classList.contains("front-face") || turning)
+    return;
+  const once = () => {
+    pet.classList.add("blinking", "eyes-closed");
+    faceTimers.push(setTimeout(() => pet.classList.remove("eyes-closed"), 130));
+    faceTimers.push(setTimeout(() => pet.classList.remove("blinking"), 260));
+  };
+  once();
+  if (double) faceTimers.push(setTimeout(once, 380));
 }
 function layoutStage() {
   if (!settings || !innerWidth || !innerHeight) return;
@@ -364,6 +410,29 @@ document.querySelector("#music").onclick = () => api.openPanel("music");
 document.querySelector("#problem").onclick = () => api.openProblem();
 document.addEventListener("pointermove", (event) => {
   api.ignoreMouse(!event.target.closest("[data-interactive]"));
+  const rect = pet.getBoundingClientRect(),
+    x = ((event.clientX - rect.left) / rect.width) * 232,
+    y = ((event.clientY - rect.top) / rect.height) * 327;
+  const over =
+    window.MigrateReactions.isHeadPoint(x, y) && !!event.target.closest("#pet");
+  if (
+    over &&
+    !headInside &&
+    !dragStart &&
+    active === "idle" &&
+    !back &&
+    Date.now() - lastHeadPat > 10000
+  ) {
+    headDwell = setTimeout(() => {
+      headDwell = null;
+      if (!dragStart && active === "idle" && headInside) perform("headpat");
+    }, 350);
+  }
+  if (!over) {
+    clearTimeout(headDwell);
+    headDwell = null;
+  }
+  headInside = over;
   if (
     dragStart &&
     Math.abs(event.screenX - dragStart.x) +
@@ -373,10 +442,15 @@ document.addEventListener("pointermove", (event) => {
     wasDragged = true;
 });
 document.addEventListener("pointerleave", () => {
+  headInside = false;
+  clearTimeout(headDwell);
+  headDwell = null;
   if (!dragStart) api.ignoreMouse(true);
 });
 pet.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
+  clearTimeout(headDwell);
+  headDwell = null;
   wasDragged = false;
   dragStart = { x: event.screenX, y: event.screenY };
   pet.setPointerCapture(event.pointerId);
@@ -425,11 +499,55 @@ setInterval(() => {
     Date.now() - lastActivity > (settings.idleInterval || 90) * 1000
   ) {
     perform({
-      group: dialogue.ambientGroup(new Date(), Math.random, settings.timeAware),
+      group:
+        settings.lively &&
+        new Date().getHours() >= 7 &&
+        new Date().getHours() < 22 &&
+        Math.random() < 0.35
+          ? ["jump", "curious", "wave", "happy"][Math.floor(Math.random() * 4)]
+          : dialogue.ambientGroup(new Date(), Math.random, settings.timeAware),
     });
   }
 }, 7000);
 say(dialogue.sample(dialogue.timeGroup()), 9000);
+frame("idle");
+function scheduleBlink() {
+  setTimeout(
+    () => {
+      if (
+        settings?.lively &&
+        settings?.autoActions &&
+        active === "idle" &&
+        !back &&
+        !dragStart
+      )
+        blinkFace(Math.random() < 0.18);
+      scheduleBlink();
+    },
+    3500 + Math.random() * 4000,
+  );
+}
+scheduleBlink();
+setInterval(() => {
+  if (
+    !settings?.lively ||
+    !settings?.autoActions ||
+    document.hidden ||
+    active !== "idle" ||
+    back ||
+    dragStart
+  ) {
+    nextMicro = Date.now() + 18000;
+    return;
+  }
+  if (Date.now() >= nextMicro) {
+    nextMicro = Date.now() + 16000 + Math.random() * 12000;
+    if (!headInside) {
+      if (Math.random() < 0.55) blinkFace(true);
+      else perform("curious", undefined, true);
+    }
+  }
+}, 1000);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     cancelTurn();

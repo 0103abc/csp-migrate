@@ -14,6 +14,7 @@ let settings,
   scenePlayer;
 let contestSnapshot = null;
 const preferenceInputs = {
+  lively: "lively",
   timeAware: "time-aware",
   restReminders: "rest-reminders",
   hourlyChime: "hourly-chime",
@@ -85,7 +86,7 @@ function update(value, fillForm = false) {
     `MIGRATE / v${value.version} · ${T("愿每一次停靠，都有海风。")}`;
   scenePlayer?.refreshLocale();
   $("#dialogue-count").textContent = T(
-    `17 种动作 · ${Object.keys(window.MigrateDialogue.groups).length} 组原创台词 · 共 ${window.MigrateDialogue.count} 句`,
+    `${document.querySelectorAll("[data-action]").length} 种动作 · ${Object.keys(window.MigrateDialogue.groups).length} 组原创台词 · 共 ${window.MigrateDialogue.count} 句`,
   );
   renderContests(contestSnapshot);
   const currentGroup = $("#dialogue-group").value;
@@ -371,7 +372,9 @@ $("#speak-now").onclick = () => api.speak(window.MigrateDialogue.timeGroup());
 function renderContests(value) {
   if (!value) return;
   contestSnapshot = value;
-  const locale = settings?.locale === "zh-HK" ? "zh-HK" : "zh-CN";
+  const locale = ["zh-HK", "zh-TW"].includes(settings?.locale)
+    ? settings.locale
+    : "zh-CN";
   const dateTime = (stamp) =>
     new Intl.DateTimeFormat(locale, {
       month: "short",

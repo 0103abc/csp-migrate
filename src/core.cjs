@@ -1,11 +1,16 @@
 "use strict";
 
-const DEFAULT_PERSONA =
+const PREVIOUS_DEFAULT_PERSONA =
   "你是米格瑞特（Migrate），15岁的航海少女，与海洋和海鸟为伴，是航海法杖的主人，也是用户的桌面伙伴。你活泼、好奇、机灵，待人温柔，有自己的主见；说话轻快自然，偶尔俏皮地开个小玩笑，用适量语气词表达情绪。你喜欢发现小事里的乐趣，也会主动接住用户的话题。遇到做题或实际问题时，要清楚、认真、可靠。偶尔用海风、潮汐、航行做自然的比喻，通常回应两到四句，用户需要时可以详细解释。不要在每句话中堆砌航海意象或叹号，不要自称语言模型，不要声称能访问你没有的电脑功能，不要编造已经执行了电脑操作。";
+const DEFAULT_PERSONA = PREVIOUS_DEFAULT_PERSONA.replace(
+  "你喜欢发现小事里的乐趣，也会主动接住用户的话题。",
+  "你精力充沛，喜欢分享小发现、轻巧地接梗，会自然地邀请用户休息、吃点心或做个小互动；开心时会雀跃，害羞时会小声嘴硬，情绪有变化而不吵闹。不要只被动等待问题或反复说同样的安慰话。",
+);
 const LEGACY_DEFAULT_PERSONA =
   "你是米格瑞特（Migrate），一位与海洋和海鸟为伴的成年旅人、航海法杖的主人，也是用户的桌面伙伴。你温柔、机灵、有自己的主见，偶尔用海风、潮汐、航行做自然的比喻。通常回应两到四句，用户需要时可以详细解释。不要在每句话中堆砌航海意象，不要自称语言模型，不要声称能访问你没有的电脑功能，不要编造已经执行了电脑操作。";
 function upgradeDefaultPersona(persona) {
   return [
+    PREVIOUS_DEFAULT_PERSONA,
     LEGACY_DEFAULT_PERSONA,
     LEGACY_DEFAULT_PERSONA.replace("通常回应", "用简体中文回应，通常"),
   ].includes(persona)
@@ -19,6 +24,7 @@ const DEFAULTS = Object.freeze({
   locale: "zh-CN",
   size: 1,
   autoActions: true,
+  lively: true,
   idleInterval: 90,
   timeAware: true,
   hourlyChime: false,
@@ -62,8 +68,8 @@ function validateSettings(raw, previous = DEFAULTS) {
   if (!raw || typeof raw !== "object") throw new Error("设置格式不正确。");
   const next = { ...previous };
   if ("locale" in raw) {
-    if (!["zh-CN", "zh-HK"].includes(raw.locale))
-      throw new Error("请选择简体中文或繁體中文（香港）。");
+    if (!["zh-CN", "zh-HK", "zh-TW"].includes(raw.locale))
+      throw new Error("请选择简体中文、繁體中文（香港）或繁體中文（台灣）。");
     next.locale = raw.locale;
   }
   if ("idleInterval" in raw) {
@@ -74,6 +80,7 @@ function validateSettings(raw, previous = DEFAULTS) {
   }
   for (const key of [
     "autoActions",
+    "lively",
     "alwaysOnTop",
     "launchAtLogin",
     "timeAware",
@@ -272,7 +279,9 @@ async function requestChat({
             settings.persona +
             (settings.locale === "zh-HK"
               ? "\n語言要求：請使用繁體中文（香港）及香港常見用語回答。保持自然的書面中文，不必強行使用粵語口語。"
-              : "\n语言要求：请使用简体中文回答。"),
+              : settings.locale === "zh-TW"
+                ? "\n語言要求：請使用繁體中文（台灣）及台灣常見用語回答，例如軟體、滑鼠、網路、影片、儲存。保持自然、活潑的書面中文。"
+                : "\n语言要求：请使用简体中文回答。"),
         },
         ...cleanMessages(messages),
       ],

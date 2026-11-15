@@ -12,12 +12,13 @@
   const SCENES = {
     home: {
       title: "去她的灯塔小屋",
-      duration: 26000,
+      duration: 32000,
       steps: [
         step(0, "invite", "想去我家看看吗？跟上我，海边这条路可漂亮啦！", {
           bg: "coast",
           phase: "welcome",
           food: null,
+          shoes: "on",
         }),
         step(2800, "follow", "沿着白色栅栏往前走，别被小海鸟带错路了。", {
           phase: "walking",
@@ -26,27 +27,36 @@
         step(10200, "invite", "到啦！我来开门——欢迎今天的小客人。", {
           phase: "welcome",
         }),
+        step(12200, "remove-shoe", "等一下下，先在门外把鞋脱好——嘿咻，一只！", {
+          phase: "removing-shoes",
+          shoes: "removing",
+        }),
         step(
-          12600,
-          "invite",
-          "请进！窗边的位置留给你，那里一抬头就能看见海。",
-          { bg: "home", phase: "entering" },
+          15200,
+          "place-shoes",
+          "另一只也脱下来，整整齐齐放在门外。好啦，不把沙子带进屋！",
+          { phase: "placing-shoes", shoes: "outside" },
         ),
+        step(18200, "home-welcome", "请进！鞋子留在外面，窗边的位置留给你～", {
+          bg: "home",
+          phase: "entering",
+          shoes: "off",
+        }),
         step(
-          16200,
-          "invite",
+          22200,
+          "home-welcome",
           "书架上有航海图和我捡的贝壳。那只歪歪的海螺，是我最喜欢的！",
           { phase: "welcome" },
         ),
         step(
-          20200,
-          "offer-cake",
+          26200,
+          "home-welcome",
           "锵锵，还有一点点待客甜点。想先坐坐，还是一起吃点东西？",
-          { phase: "offering" },
+          { phase: "offering", food: "cake" },
         ),
         step(
-          23800,
-          "invite",
+          29800,
+          "home-welcome",
           "这里不用赶路。你就把自己当成来做客的老朋友吧。",
           { phase: "welcome" },
         ),
@@ -162,6 +172,12 @@
       this.caption = root.querySelector(".scene-caption");
       this.actors = [...root.querySelectorAll(".scene-character")];
       this.backgrounds = [...root.querySelectorAll(".scene-bg")];
+      const entry = document.createElement("div");
+      entry.className = "scene-entry";
+      entry.setAttribute("aria-hidden", "true");
+      entry.innerHTML =
+        '<span class="entry-opening"></span><span class="entry-frame"></span><span class="entry-mat"></span><img class="entry-boots" src="../assets/scene-door-boots.png" alt="">';
+      this.stage.append(entry);
       this.actorLayer = 0;
       this.bgLayer = 0;
       root.querySelector("[data-control=pause]").onclick = () =>
@@ -183,6 +199,10 @@
         "eat-happy",
         "offer-cake",
         "offer-pudding",
+        "remove-shoe",
+        "place-shoes",
+        "home-welcome",
+        "door-boots",
       ]) {
         const img = new Image();
         img.src = `../assets/scene-${name}.png`;
@@ -220,6 +240,8 @@
       this.stage.dataset.phase = scene.phase;
       this.stage.dataset.food = scene.food || "";
       this.stage.dataset.background = scene.bg;
+      this.stage.dataset.shoes = scene.shoes || "on";
+      this.stage.dataset.story = this.state.id;
       this.swap(this.actors, scene.pose, "pose");
       this.swap(this.backgrounds, scene.bg, "background");
       this.root.querySelector(".scene-food").innerHTML =

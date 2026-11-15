@@ -6,9 +6,10 @@
 })(typeof globalThis === "object" ? globalThis : this, function (OpenCC) {
   "use strict";
   const toHK = OpenCC.Converter({ from: "cn", to: "hkp" });
+  const toTW = OpenCC.Converter({ from: "cn", to: "twp" });
   function text(value, locale = "zh-CN") {
-    if (locale !== "zh-HK") return String(value);
-    return toHK(String(value))
+    if (!["zh-HK", "zh-TW"].includes(locale)) return String(value);
+    return (locale === "zh-TW" ? toTW : toHK)(String(value))
       .replaceAll("設置", "設定")
       .replaceAll("文件", "檔案")
       .replaceAll("視頻", "影片")

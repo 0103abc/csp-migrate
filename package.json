@@ -1,7 +1,7 @@
 {
   "name": "csp-migrate",
   "productName": "Migrate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "米格瑞特 Migrate · 海风与你同在的 Windows 桌面伙伴",
   "main": "src/main.cjs",
   "author": "csp-migrate contributors",
@@ -15,6 +15,7 @@
     "assets": "node scripts/prepare-assets.cjs",
     "assets:scenes": "node scripts/prepare-scenes.cjs",
     "assets:turn": "node scripts/prepare-turn.cjs",
+    "assets:entry": "node scripts/prepare-entry.cjs",
     "build": "node scripts/build.cjs"
   },
   "devDependencies": {

@@ -61,7 +61,7 @@
           if (generation !== this.generation) return;
           if (start === undefined) start = now;
           const p = Math.min(1, (now - start) / duration),
-            movement = Math.max(0, Math.min(1, (p - 0.08) / 0.84));
+            movement = p;
           const f = sampleFrames(movement, reverse);
           ctx.clearRect(0, 0, width, height);
           ctx.globalCompositeOperation = "source-over";
@@ -94,18 +94,10 @@
           ctx.globalCompositeOperation = "source-over";
           this.canvas.dataset.frame = String(f.lower);
           this.canvas.dataset.progress = String(p);
-          if (p < 0.08) {
-            this.canvas.style.opacity = String(p / 0.08);
-            this.sprite.style.opacity = String(1 - p / 0.08);
-          } else if (p > 0.92) {
-            this.sprite.src = targetUrl;
-            const fade = (p - 0.92) / 0.08;
-            this.canvas.style.opacity = String(1 - fade);
-            this.sprite.style.opacity = String(fade);
-          } else {
-            this.canvas.style.opacity = "1";
-            this.sprite.style.opacity = "0";
-          }
+          // The standing PNGs are exact copies of the endpoint frames. Swapping
+          // identical pixels avoids the translucent double fade at either end.
+          this.canvas.style.opacity = "1";
+          this.sprite.style.opacity = "0";
           if (p === 1) {
             this.canvas.style.opacity = "0";
             this.sprite.src = targetUrl;
