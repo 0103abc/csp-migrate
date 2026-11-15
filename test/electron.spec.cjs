@@ -118,7 +118,7 @@ test("desktop, settings encryption, streaming chat, stop, music and persistence"
       )
       .toBe(false);
     await pet.evaluate(() => window.migrate.action("turn"));
-    await expect(pet.locator("#sprite")).toHaveAttribute("src", /standing-front\.png/);
+    await expect(pet.locator("#sprite")).toHaveAttribute("src", /idle\.png/);
     const panelPromise = app.waitForEvent("window");
     await pet.evaluate(() => window.migrate.openPanel("settings"));
     const panel = await panelPromise;

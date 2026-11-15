@@ -66,7 +66,7 @@ test("16-angle turns, local time dialogue and hidden-pet contest reminders work 
       omitBackground: true,
     });
     await expect.poll(() => pet.evaluate(() => turning)).toBe(false);
-    await expect(pet.locator("#sprite")).toHaveAttribute("src", /standing-front\.png/);
+    await expect(pet.locator("#sprite")).toHaveAttribute("src", /idle\.png/);
     await pet.evaluate(() => window.migrate.action("turn"));
     await expect.poll(() => pet.evaluate(() => turning)).toBe(true);
     await pet.evaluate(() => window.migrate.action("wave"));
@@ -76,7 +76,7 @@ test("16-angle turns, local time dialogue and hidden-pet contest reminders work 
     await pet.evaluate(() => window.migrate.action("looksea"));
     await expect(pet.locator("#pet")).toHaveClass(/looksea.*turning/);
     await expect(pet.locator("#sprite")).toHaveAttribute("src", /back\.png/);
-    await expect(pet.locator("#sprite")).toHaveAttribute("src", /standing-front\.png/, {
+    await expect(pet.locator("#sprite")).toHaveAttribute("src", /idle\.png/, {
       timeout: 7000,
     });
     await pet.evaluate(() => window.migrate.action("idle"));

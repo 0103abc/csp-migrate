@@ -16,28 +16,28 @@ for (const selector of ["#bubble", "#hide"])
   document.querySelector(selector).setAttribute("data-no-localize", "");
 const applyLocale = window.MigrateI18n.bindDocument(document);
 const sprites = {
-  idle: "standing-front",
+  idle: "idle",
   wave: "wave",
-  back: "standing-back",
+  back: "back",
   magic: "magic",
   happy: "happy",
   sleep: "sleep",
   walk: "side",
   talk: "talk",
-  nod: "standing-front",
-  shake: "standing-front",
+  nod: "idle",
+  shake: "idle",
   bounce: "happy",
   float: "magic",
   birds: "magic",
   stretch: "wave",
   shy: "talk",
-  sway: "standing-front",
-  looksea: "standing-back",
+  sway: "idle",
+  looksea: "back",
   peek: "side",
   jump: "happy",
-  blink: "standing-front",
-  headpat: "standing-front",
-  curious: "standing-front",
+  blink: "idle",
+  headpat: "idle",
+  curious: "idle",
 };
 const images = Object.values(sprites).map((name) => {
   const img = new Image();
@@ -169,10 +169,7 @@ function say(text, duration = 5000) {
 function frame(name) {
   sprite.src = `../assets/${sprites[name] || name}.png`;
   sprite.dataset.pose = name;
-  pet.classList.toggle(
-    "front-face",
-    (sprites[name] || name) === "standing-front",
-  );
+  pet.classList.toggle("front-face", (sprites[name] || name) === "idle");
 }
 function cancelTurn() {
   clearTimeout(headDwell);
@@ -325,18 +322,16 @@ function perform(value, group, quiet = false) {
   if (value === "looksea") {
     const generation = turnGeneration;
     pet.classList.add("turning");
-    void turnPlayer
-      .play(false, "../assets/standing-back.png")
-      .then((completed) => {
-        if (!completed || generation !== turnGeneration) return;
-        poseTimers.push(
-          setTimeout(async () => {
-            if (generation !== turnGeneration) return;
-            await turnPlayer.play(true, "../assets/standing-front.png");
-            if (generation === turnGeneration) pet.classList.remove("turning");
-          }, 2900),
-        );
-      });
+    void turnPlayer.play(false, "../assets/back.png").then((completed) => {
+      if (!completed || generation !== turnGeneration) return;
+      poseTimers.push(
+        setTimeout(async () => {
+          if (generation !== turnGeneration) return;
+          await turnPlayer.play(true, "../assets/idle.png");
+          if (generation === turnGeneration) pet.classList.remove("turning");
+        }, 2900),
+      );
+    });
   } else if (choreography[value]) {
     const generation = turnGeneration;
     poseTimers = choreography[value].poses.map(([at, pose]) =>

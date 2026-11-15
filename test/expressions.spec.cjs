@@ -37,10 +37,43 @@ test("head hovering, blinking, jumping, doorway shoes and Taiwan language behave
     const pet = await app.firstWindow();
     pet.on("pageerror", (e) => errors.push(e.message));
     await pet.waitForLoadState();
-    await expect(pet.locator("#sprite")).toHaveAttribute(
-      "src",
-      /standing-front\.png/,
-    );
+    await expect(pet.locator("#sprite")).toHaveAttribute("src", /idle\.png/);
+    expect(
+      await pet.evaluate(async () => {
+        await turnPlayer.ready;
+        for (const [p, name] of [
+          [0, "idle"],
+          [1, "back"],
+        ]) {
+          const original = new Image();
+          original.src = `../assets/${name}.png`;
+          await original.decode();
+          const expected = document.createElement("canvas");
+          expected.width = 640;
+          expected.height = 654;
+          const scale = 654 / original.naturalHeight,
+            w = original.naturalWidth * scale;
+          expected
+            .getContext("2d")
+            .drawImage(original, (640 - w) / 2, 0, w, 654);
+          turnPlayer.drawAt(p);
+          const actual = document
+              .querySelector("#turn-canvas")
+              .getContext("2d")
+              .getImageData(0, 0, 640, 654).data,
+            reference = expected
+              .getContext("2d")
+              .getImageData(0, 0, 640, 654).data;
+          if (
+            !actual.every(
+              (value, index) => Math.abs(value - reference[index]) <= 1,
+            )
+          )
+            return false;
+        }
+        return true;
+      }),
+    ).toBe(true);
     const hover = async (x, y) =>
       pet.evaluate(
         ({ x, y }) => {

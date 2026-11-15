@@ -35,7 +35,7 @@
 
 ## 站姿、表情与进门小剧场
 
-- `standing-front.png` / `standing-back.png`：直接从最终转身序列首尾帧导出，不重新绘制；用相同的尺寸显示，确保待机与转身端点的颜色和透明度逐像素一致。`npm run assets:turn` 可重建。
+- 待机和头部表情继续使用原始 `idle.png`；转身只使用原始 `idle.png`、`side.png`、`back.png`，不重新生成或调色。局部网格形变与短暂交接由 Canvas 实现。`standing-front.png` / `standing-back.png` 和此前的角度图集仅保留作中间素材存档，不用于当前待机或转身。
 - 眨眼的眼睑、睫毛与害羞时的脸红采用本地 SVG 图层；头部使用同一站姿贴图做轻微摇头，跳跃、落地与门口动作由 CSS / JavaScript 控制，不调用 AI。
 - `entry-atlas.png`：以 `scene-invite.png` 为人物参考，由内置 **imagegen** 生成 4×1 透明图集：脱下一只鞋、把两只鞋摆好、赤脚迎客、单独的一双蓝白金色短靴。
 - `scene-remove-shoe.png`、`scene-place-shoes.png`、`scene-home-welcome.png`、`scene-door-boots.png`：从图集裁切并等比缩放，`npm run assets:entry` 可重建。原始图集不进入发行包。

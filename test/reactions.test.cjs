@@ -10,22 +10,14 @@ test("head hit region covers hair and hat while excluding skirt, feet and transp
   assert.equal(isHeadPoint(20, 10), false);
   assert.equal(isHeadPoint(230, 80), false);
 });
-test("standing sprites exactly match the turn endpoints including all colors and transparency", async () => {
-  const sharp = require("sharp"),
-    dir = path.resolve(__dirname, "../assets");
-  for (const [index, name] of [
-    [0, "standing-front"],
-    [15, "standing-back"],
-  ]) {
-    const expected = await sharp(path.join(dir, "turn-strip.png"))
-      .extract({ left: index * 640, top: 0, width: 640, height: 654 })
-      .raw()
-      .toBuffer();
-    const actual = await sharp(path.join(dir, name + ".png"))
-      .raw()
-      .toBuffer();
-    assert.ok(actual.equals(expected), name + " differs from turn endpoint");
-  }
+test("turn uses the original artwork and reaches its exact front, side and back endpoints", () => {
+  const { TURN_POSES, sampleTurn } = require("../src/turn-player.js");
+  assert.deepEqual(TURN_POSES, ["idle", "side", "back"]);
+  assert.deepEqual(sampleTurn(0), { from: 0, to: 1, weight: 0 });
+  assert.deepEqual(sampleTurn(0.5), { from: 1, to: 2, weight: 0 });
+  assert.deepEqual(sampleTurn(1), { from: 1, to: 2, weight: 1 });
+  assert.deepEqual(sampleTurn(0, true), sampleTurn(1));
+  assert.deepEqual(sampleTurn(1, true), sampleTurn(0));
 });
 test("Taiwan conversion uses local phrases and API requests receive the selected language", async () => {
   const { text } = require("../src/i18n.js"),
